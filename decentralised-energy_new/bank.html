@@ -1,0 +1,421 @@
+<html>
+<head>              
+<link rel="stylesheet"href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0-beta/css/materialize.min.css">
+<!-- Compiled and minified JavaScript -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0-beta/js/materialize.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+<script src="https://rawgit.com/gdi2290/angular-websocket/v1.0.9/angular-websocket.js"></script>
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script> 
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<style>
+  select{
+      display: inline;
+  }
+     body {font-family: Arial;}
+     div#envelope{
+     width: 70%;
+     margin: 10px 30% 10px 25%;
+     padding:10px 0;
+     border: 2px solid gray;
+     height: 120%;
+     }
+   
+   </style>
+</head>
+
+<body ng-init="loadBanks()">
+<div ng-app="myApp" ng-controller="myCtrl" >
+      <div id="envelope">
+        <h4><b> Banks </b></h4>
+        <div>
+        <table id="table"style="width:100%">
+
+        <tr class="thead-cols">          
+            <th class="bc">Bank ID</th>        
+            <th class="bc" >Bank Name</th>       
+            <th class="bc" >Coins Balance</th>  
+            <th class="bc">Cash Balance</th>  
+            <th class="bc">Cash Currency</th>
+            <th class="bc">Actions</th>       
+      </tr>
+        
+            <tr ng-repeat="bank in Banks">
+                <td><div ng-show="Banks[$index]">{{bank.bankID}}</div></td>           
+                <td><div ng-show="Banks[$index]">{{bank.name}}</div></td>            
+                <td><div ng-show="Banks[$index]">{{bank.coins}}</div></td>
+                <td><div ng-show="Banks[$index]">{{bank.cash}}</div></td>
+                <td><div ng-show="Banks[$index]">{{bank.cashCurrency}}</div></td>
+                <td><div ng-show="Banks[$index]"><input type="button" ng-click="Remove($index)" value="Remove" /></div></td>
+                <td><div ng-show="Banks[$index]"><input type="button"ng-attr-id="{{ 'myBtn-' + $index }}" ng-click="openUpdate($index)"value="Update" /></div></td>
+                <!-- <button id="myBtn">Open Modal</button> -->
+            </tr>   
+<!-- The Modal -->
+<div id="myModal" class="modal" >
+  <!-- Modal content -->
+  <div class="modal-content" >
+    <span class="close">&times;</span>    
+        <div class="form-group text-left">
+            <input type="text" name="bankID" placeholder="bank ID" ng-model="bankIDup" readonly>    
+        </div>          
+        <div class="form-group text-left">
+          <input type="text" name="name" placeholder="Bank Name" ng-model="nameDup">       
+        </div>           
+          <input type="button" ng-click="Update()" value="Submit" />
+  </div>
+          <td><input type="text" id="bankID" ng-model="bankID" /></td>
+          <td><input type="text" ng-model="name" id="name" /></td>
+          <td><input type="text" ng-model="coins" id="coins"/></td>
+          <td><input type="text" ng-model="cash" id="cash" /></td>
+          <td><select name="cashCurrency" id="cashCurrency" ng-model="cashCurrency"> /><option value="USD">USD</option></select> </td>
+          <td><input type="button" ng-click="Add()" value="Add" /></td>
+      </table>
+        </div>
+        </div>
+        <div ng-show="sucess"></div>
+          Registered with transaction Id {{transactionId}}
+        </div> 
+</div>
+</body>
+
+
+<script>
+var app = angular.module('myApp', []);
+app.controller('myCtrl',['$scope','$http','$timeout','$q',function ($scope,$http,$timeout,$q) {
+  
+  $scope.sucess=false
+  $scope.transactionId="";
+  $scope.index=""
+  $scope.bankID="";
+ $scope.bankIDup="";
+ $scope.nameDup="";
+ $scope.name="";
+ $scope.cash="";
+ $scope.coins="";
+ $scope.cashCurrency="";
+ $scope.Banks = []
+ $scope.BanksResponse=[]
+ $scope.coinValue = [];
+ $scope.coinID=[];
+ $scope.cashValue = [];
+ $scope.cashID = [];
+ var mySubStringCoin="";
+ var mySubStringCash="";
+  
+  $scope.Add = function(){
+ var bankinner = {}
+ bankinner.bankID = $scope.bankID
+ bankinner.name = $scope.name
+ bankinner.cash = $scope.cash
+ bankinner.coins = $scope.coins
+ bankinner.cashCurrency =$scope.cashCurrency
+ $scope.Banks.push(bankinner)
+ $scope.message = "Product have been created sucessfully";
+ $scope.setValue();
+
+ $scope.bankIDup= $scope.bankID
+ $scope.nameDup= $scope.name
+ $scope.cashDup= $scope.cash
+ $scope.coinsDup=$scope.coins
+ $scope.cashCurrencyDup=$scope.cashCurrency
+ $scope.bankID="";
+ $scope.name="";
+ $scope.cash="";
+ $scope.coins="";
+ $scope.cashCurrency="";
+}
+
+
+ $scope.Remove = function (index) {
+     //Find the record using Index from Array.
+     var id = $scope.Banks[index].bankID;
+         $scope.Banks.splice(index, 1);
+    var del = "/" + (index + 1);
+     var requestInfo = Request();
+     data : requestInfo
+  var res = $http.delete('http://ec2-35-173-231-185.compute-1.amazonaws.com:3000/api/Bank/'+id,del).then((function(response) {
+console.log("success");
+}),(function(data,status,headers,config) {
+alert( "No product with specified UUID");
+}));
+   
+var delCoins = "/" + (index + 1);
+console.log(delCoins)
+var res = $http.delete('http://ec2-35-173-231-185.compute-1.amazonaws.com:3000/api/Coins/'+"CO_"+id,delCoins).then((function(response) {
+console.log("success deleting coins asset");
+}),(function(data,status,headers,config) {
+alert( "No product with specified UUID");
+}));
+
+var res = $http.delete('http://ec2-35-173-231-185.compute-1.amazonaws.com:3000/api/Cash/'+"CA_"+id,del).then((function(response) {
+console.log("success deleting Energy asset");
+}),(function(data,status,headers,config) {
+alert( "No product with specified UUID");
+}));
+
+ }
+$scope.openUpdate = function (index)
+{
+   
+    var table = document.getElementById("table"), index;
+for(var i=0; i<table.rows.length; i++)
+{
+    table.rows[i].onclick = function()
+    {
+        rindex=this.rowIndex;
+        console.log(rindex);
+        $scope.bankIDup = this.cells[0].innerText;
+        $scope.nameDup=this.cells[1].innerText;
+        // console.log( document.getElementById("residentID").value)
+    };
+}
+    $scope.index=index;
+    var modal =""
+    var btn =""
+    var span=""
+  modal = document.getElementById('myModal');
+// Get the button that opens the modal
+btn = document.getElementById("myBtn-"+index);
+// Get the <span> element that closes the modal
+span = document.getElementsByClassName("close")[0];
+// When the user clicks the button, open the modal 
+btn.onclick = function() {
+    modal.style.display = "block";
+}
+$scope.message = "Product have been updated sucessfully";
+// When the user clicks on <span> (x), close the modal
+span.onclick = function() {
+    modal.style.display = "none";
+     
+    $scope.bankID=""
+    $scope.name=""
+} 
+}
+
+
+$scope.loadBanks = function() {
+  var requestDisplay={
+  "$class": "org.decentralized.energy.network.Bank",
+  "bankID": $scope.bankID,
+  "name": $scope.name,
+  "coins": "resource:org.decentralized.energy.network.Coins#CO_"+$scope.bankID,
+  "cash": "resource:org.decentralized.energy.network.Cash#CA_"+$scope.bankID,
+} 
+    var requestInfo = Request();
+     data : requestInfo
+  var res = $http.get('http://ec2-35-173-231-185.compute-1.amazonaws.com:3000/api/Bank/',requestDisplay).then((function(data,status,
+headers,config) {
+console.log("success");
+for(var i=0;i<data.data.length;i++){   
+$scope.Banks.push(data.data[i]);
+$scope.Banks[i].cashCurrency = "USD";
+console.log($scope.Banks)
+console.log(mySubStringCash)
+}
+$scope.loadCoinValue();
+$scope.loadCashValue();
+}),(function(data,status,headers,config) {  
+alert( "cannot display data");
+}));
+};
+$scope.loadBanks();
+
+$scope.loadCoinValue = function()
+{
+    var result = $q.defer();
+    //setTimeout(result.resolve,$scope.Residents*100000);
+    for(var j=0;j<$scope.Banks.length;j++){       
+    var id = $scope.Banks[j].bankID;
+     
+    var res = $http.get('http://ec2-35-173-231-185.compute-1.amazonaws.com:3000/api/Coins/CO_'+id).then(function successCallback(response) {
+        result.resolve(response)
+$scope.coinValue.push(response.data.value);
+$scope.coinID.push(response.data.coinsID);
+
+if($scope.Banks.length == $scope.coinValue.length)
+{
+    $scope.insertCoins();
+}
+return result.promise;
+},(function(data,status,headers,config) {
+alert( "No product with specified UUID");
+}));
+}
+console.log($scope.coinValue)
+console.log($scope.coinID);
+}
+$scope.insertCoins = function()
+{
+    for(var m=0;m<$scope.Banks.length;m++){
+         mySubStringCoin = $scope.Banks[m].coins.substring($scope.Banks[m].coins.lastIndexOf("#") + 1);
+         console.log($scope.coinID[m])
+        console.log(mySubStringCoin)
+        console.log($scope.coinValue[m])
+        if($scope.coinID[m] == mySubStringCoin)  
+        {
+      
+        $scope.Banks[m].coins = $scope.coinValue[m];
+        }
+      }
+    
+}
+
+$scope.loadCashValue = function()
+{
+    var result = $q.defer();
+    setTimeout(result.resolve,$scope.Banks*100000);
+    for(var j=0;j<$scope.Banks.length;j++){       
+    var id = $scope.Banks[j].bankID;
+     
+    var res = $http.get('http://ec2-35-173-231-185.compute-1.amazonaws.com:3000/api/Cash/CA_'+id).then(function successCallback(response) {
+        result.resolve(response)
+$scope.cashValue.push(response.data.value);
+$scope.cashID.push(response.data.cashID);
+
+if($scope.Banks.length == $scope.cashValue.length)
+{
+    $scope.insertCash();
+}
+return result.promise;
+},(function(data,status,headers,config) {
+alert( "No product with specified UUID");
+}));
+}
+console.log($scope.cashValue)
+console.log($scope.cashID);
+}
+$scope.insertCash = function()
+{
+    for(var m=0;m<$scope.Banks.length;m++){
+         mySubStringCash = $scope.Banks[m].cash.substring($scope.Banks[m].cash.lastIndexOf("#") + 1);
+         console.log($scope.cashID[m])
+        console.log(mySubStringCash)
+        console.log($scope.cashValue[m])
+        if($scope.cashID[m] == mySubStringCash)  
+        {
+      
+        $scope.Banks[m].cash = $scope.cashValue[m];
+        }
+      }
+    
+}
+
+
+
+ $scope.Update = function () {
+//var resID = $scope.Residents[index].residentID;
+$scope.Banks[$scope.index].name=$scope.nameDup;
+//$scope.Banks[$scope.index].lastName=$scope.lastNameDup;
+     
+var requestUp={
+
+   "$class": "org.decentralized.energy.network.Bank",
+  "bankID": $scope.bankIDup,
+  "name": $scope.nameDup,
+  "coins": "resource:org.decentralized.energy.network.Coins#CO_"+$scope.bankIDup,
+  "cash": "resource:org.decentralized.energy.network.Cash#CA_"+$scope.bankIDup
+} 
+     var requestInfo = Request();
+     data : requestInfo
+  var res = $http.put('http://ec2-35-173-231-185.compute-1.amazonaws.com:3000/api/Bank/'+$scope.bankIDup,requestUp).then(function successCallback(response){
+           alert("Successfully added new batch");
+           $scope.update_response=response;
+           $scope.sucess=true
+           $scope.transactionId=$scope.update_response.data.transactionId
+       }, function errorCallback(response){
+           console.log("PUT-ing of data failed");
+       });
+ }
+
+
+$scope.setValue=function() {
+    var request={      
+  "$class": "org.decentralized.energy.network.Bank",
+  "bankID": $scope.bankID,
+  "name": $scope.name,
+  "coins": "resource:org.decentralized.energy.network.Coins#CO_"+$scope.bankID,
+  "cash": "resource:org.decentralized.energy.network.Cash#CA_"+$scope.bankID
+}
+
+
+     var requestInfo = Request();
+   
+     data : requestInfo
+ 
+  var res = $http.post('http://ec2-35-173-231-185.compute-1.amazonaws.com:3000/api/Bank',request).then(function successCallback(response){
+           alert("Successfully added new batch");
+           $scope.update_response=response;
+           $scope.sucess=true
+           $scope.transactionId=$scope.update_response.data.transactionId
+           $scope.addCoins();
+       }, function errorCallback(response){
+           console.log("POST-ing of data failed");
+       });
+}
+
+$scope.addCoins = function() {
+       var requestAddCoins={
+         "$class": "org.decentralized.energy.network.Coins",
+          "coinsID":"CO_" + $scope.bankIDup,
+          "value":$scope.coinsDup,
+          "ownerID":$scope.bankIDup,
+          "ownerEntity":'Bank'
+    };
+
+    var requestInfo = Request();
+     data : requestInfo
+  var res = $http.post('http://ec2-35-173-231-185.compute-1.amazonaws.com:3000/api/Coins',requestAddCoins).then((function(data,status,
+headers,config) {
+console.log("success");
+for(var i=0;i<data.data.length;i++){
+$scope.BanksResponse.push(data.data[i]);
+console.log($scope.BanksResponse)
+}
+$scope.addCash();
+}),(function(data,status,headers,config) {
+   
+alert( "cannot display data");
+}));
+}
+
+$scope.addCash = function() {
+       var requestAddCash={
+         "$class": "org.decentralized.energy.network.Cash",
+          "cashID":"CA_" + $scope.bankIDup,
+          "currency":$scope.cashCurrencyDup,
+          "value":$scope.cashDup,
+          "ownerID":$scope.bankIDup,
+          "ownerEntity":'Bank'  
+    };
+
+    var requestInfo = Request();
+     data : requestInfo
+  var res = $http.post('http://ec2-35-173-231-185.compute-1.amazonaws.com:3000/api/Cash',requestAddCash).then((function(data,status,
+headers,config) {
+console.log("success");
+for(var i=0;i<data.data.length;i++){
+$scope.BanksResponse.push(data.data[i]);
+console.log($scope.BanksResponse)
+}
+}),(function(data,status,headers,config) {
+   
+alert( "cannot display data");
+}));
+}
+
+function Request() {
+ 
+  return {
+ 
+
+  "$class": "org.decentralized.energy.network.Bank",
+  "bankID": "",
+  "name": "",
+  "coins": "",
+  "cash": "",
+  }
+  };
+}]);
+ 
+</script>
+ 
+</html>

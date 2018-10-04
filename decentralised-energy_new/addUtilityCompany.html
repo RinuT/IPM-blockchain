@@ -1,0 +1,193 @@
+<html>
+<head>              
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+        <link href="css/bootstrap.min.css" rel="stylesheet">
+        <link href="css/style.css" rel="stylesheet">	
+        <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
+
+</head>
+
+<body class="manufacturer_wrapper">
+        <div ng-app="myApp" ng-controller="myCtrl" >
+                <div class="right_content_block col-md-9">
+                    <div class="alert alert-danger" ng-show="failuer">
+                        Could not add utility Company. Utility Company with same  ID exist. 
+                    </div>    
+                    <div class="alert alert-success" ng-show="sucess">
+                        Utility Company added sucessfully
+                        <p id="demo"></p>
+                    </div>  
+                <h2> Add Utility Company </h2>
+          <form>
+                <span class="fields_design col-md-6">
+                    <label>Utility ID</label>
+                    <input type="text" value="Enter Utility ID"ng-model="utilityID"/>
+                </span>
+                
+                <span class="fields_design col-md-6">
+                    <label>Utility Name</label>
+                    <input type="text" value="Enter Utility Name"ng-model="name"/>
+                </span>
+                
+                <span class="fields_design col-md-6">
+                        <label>Coin Balance</label>
+                        <input type="text" value="Coin Balance"ng-model="coins"/>
+                </span>
+        
+                 <span class="fields_design col-md-6">
+                    <label>Energy value</label>
+                    <input type="text" value="Energy Value"ng-model="energy"/>
+                </span>
+        
+                <span class="fields_design col-md-6">
+                        <label>Energy Units</label>
+                        <input type="text" value="Energy Units"ng-model="energyUnits"/>
+                </span>
+                
+                <div class="clearfix"></div>
+                <div class="submit_block">
+                    <input type="button" value="Submit" class="submit_btn_cmn"ng-click="Add()"/>
+                </div>
+            </form>
+                </div>
+        </div> 
+        </body>
+
+<script>
+var app = angular.module('myApp', []);
+app.controller('myCtrl',['$scope','$http','$timeout','$q',function ($scope,$http,$timeout,$q) {
+  
+  $scope.sucess=false
+  $scope.failuer=false;
+  $scope.transactionId="";
+  $scope.index=""
+ $scope.utilityID="";
+ $scope.utilityIDup="";
+ $scope.nameDup="";
+ $scope.name="";
+ $scope.coins="";
+ $scope.energy="";
+ $scope.energyUnits="";
+ $scope.Utility = []
+ $scope.UtilityResponse=[]
+ $scope.coinID = [];
+ $scope.coinValue = [];
+ $scope.energyValue = [];
+ $scope.energyID = [];
+ var mySubStringCoin = "";
+ var mySubStringEnergy = "";
+ 
+  
+  $scope.Add = function(){
+ var utilityinner = {}
+ utilityinner.utilityID = $scope.utilityID
+ utilityinner.name = $scope.name
+ utilityinner.coins = $scope.coins
+ utilityinner.energy = $scope.energy
+ utilityinner.energyUnits = $scope.energyUnits
+ $scope.Utility.push(utilityinner)
+ $scope.message = "Product have been created sucessfully";
+ $scope.setValue();
+
+ $scope.utilityIDup= $scope.utilityID
+ $scope.nameDup= $scope.name
+ $scope.coinsDup=$scope.coins
+ $scope.energyDup=$scope.energy
+ $scope.energyUnitsDup=$scope.energyUnits
+ 
+ $scope.utilityID="";
+ $scope.name="";
+ $scope.coins="";
+ $scope.energy="";
+ $scope.energyUnits="";
+}
+
+$scope.setValue=function() {
+    var request={
+  
+        "$class": "org.decentralized.energy.network.UtilityCompany",
+    "utilityID": $scope.utilityID,
+    "name": $scope.name,
+    "coins": "resource:org.decentralized.energy.network.Coins#CO_"+$scope.utilityID,
+    "energy": "resource:org.decentralized.energy.network.Energy#EN_"+$scope.utilityID
+} 
+     var requestInfo = Request();
+   
+     data : requestInfo
+ 
+  var res = $http.post('http://ec2-35-173-231-185.compute-1.amazonaws.com:3000/api/UtilityCompany',request).then(function successCallback(response){
+        //    alert("Successfully added new batch");
+           $scope.update_response=response;
+           $scope.transactionId=$scope.update_response.data.transactionId
+           $scope.addCoins();
+
+       }, function errorCallback(response){
+           console.log("POST-ing of data failed");
+       });
+}
+$scope.addCoins = function() {
+       var requestAddCoins={
+         "$class": "org.decentralized.energy.network.Coins",
+          "coinsID":"CO_" + $scope.utilityIDup,
+          "value":$scope.coinsDup,
+          "ownerID":$scope.utilityIDup,
+          "ownerEntity":'UtilityCompany'
+    };
+
+    var requestInfo = Request();
+     data : requestInfo
+  var res = $http.post('http://ec2-35-173-231-185.compute-1.amazonaws.com:3000/api/Coins',requestAddCoins).then((function(data,status,
+headers,config) {
+console.log("success");
+for(var i=0;i<data.data.length;i++){
+$scope.UtilityResponse.push(data.data[i]);
+console.log($scope.UtilityResponse)
+}
+$scope.addEnergy();
+}),(function(data,status,headers,config) {
+   
+alert( "cannot display data");
+}));
+}
+$scope.addEnergy = function() {
+       var requestAddEnergy={
+          "$class": "org.decentralized.energy.network.Energy",
+          "energyID":"EN_" + $scope.utilityIDup,
+          "units":$scope.energyUnitsDup,
+          "value":$scope.energyDup,
+          "ownerID":$scope.utilityIDup,
+          "ownerEntity":'UtilityCompany'    
+    };
+
+    var requestInfo = Request();
+     data : requestInfo
+  var res = $http.post('http://ec2-35-173-231-185.compute-1.amazonaws.com:3000/api/Energy',requestAddEnergy).then((function(data,status,
+headers,config) {
+console.log("success");
+for(var i=0;i<data.data.length;i++){
+$scope.UtilityResponse.push(data.data[i]);
+console.log($scope.UtilityResponse)
+}
+$scope.sucess=true;
+}),(function(data,status,headers,config) {
+   $scope.failuer=true;
+alert( "cannot display data");
+}));
+}
+function Request() {
+ 
+  return {
+    "$class": "org.decentralized.energy.network.UtilityCompany",
+    "utilityID": "",
+    "name": "",
+    "coins": "",
+    "energy": ""
+  }
+  };
+}]);
+ 
+</script>
+ 
+</html>

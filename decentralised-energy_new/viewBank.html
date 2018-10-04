@@ -1,0 +1,182 @@
+<html>
+<head>              
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+        <link href="css/bootstrap.min.css" rel="stylesheet">
+        <link href="css/style.css" rel="stylesheet">	
+        <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
+</head>
+<body class="manufacturer_wrapper" ng-init="loadBanks()">
+<div ng-app="myApp" ng-controller="myCtrl" >
+        <div class="right_content_block col-md-9">
+                <form>
+                <h2><b> View Banks </b></h2>
+                <span class="fields_design col-md-6"></span>
+                <div class="component">
+                        <div>
+                                <div class="col s12" >
+                                <div style= "padding: 2%;""text-align: center;">
+                                <table BORDER=1 BORDERCOLOR="#8fb2b9"style="height:100px; width: 100%">
+                                    <thead style="background-color:white;"><tr>      
+            <th class="bc"><label>Bank ID</label></th>        
+            <th class="bc" ><label> Name</label></th>       
+            <th class="bc" ><label>Coins Balance</label></th>  
+            <th class="bc"><label>Cash Balance</label></th>  
+            <th class="bc"><label>Cash Currency</label></th>     
+      </tr></thead>
+      <tbody style="background-color:#b3c8cb;">
+            <tr ng-repeat="bank in Banks">
+                <td><div ng-show="Banks[$index]">{{bank.bankID}}</div></td>           
+                <td><div ng-show="Banks[$index]">{{bank.name}}</div></td>            
+                <td><div ng-show="Banks[$index]">{{bank.coins}}</div></td>
+                <td><div ng-show="Banks[$index]">{{bank.cash}}</div></td>
+                <td><div ng-show="Banks[$index]">{{bank.cashCurrency}}</div></td>
+            </tr> 
+              </tbody>
+      </table>
+    </div>
+</div>
+</div>
+</span>
+</div>
+<div class="clearfix"></div>
+</form> 
+</div>
+</div>
+</body>
+
+
+<script>
+var app = angular.module('myApp', []);
+app.controller('myCtrl',['$scope','$http','$timeout','$q',function ($scope,$http,$timeout,$q) {
+  
+  $scope.sucess=false
+  $scope.transactionId="";
+  $scope.index=""
+  $scope.bankID="";
+ $scope.bankIDup="";
+ $scope.nameDup="";
+ $scope.name="";
+ $scope.cash="";
+ $scope.coins="";
+ $scope.cashCurrency="";
+ $scope.Banks = []
+ $scope.BanksResponse=[]
+ $scope.coinValue = [];
+ $scope.coinID=[];
+ $scope.cashValue = [];
+ $scope.cashID = [];
+ var mySubStringCoin="";
+ var mySubStringCash="";
+  
+$scope.loadBanks = function() {
+  var requestDisplay={
+  "$class": "org.decentralized.energy.network.Bank",
+  "bankID": $scope.bankID,
+  "name": $scope.name,
+  "coins": "resource:org.decentralized.energy.network.Coins#CO_"+$scope.bankID,
+  "cash": "resource:org.decentralized.energy.network.Cash#CA_"+$scope.bankID,
+} 
+    var requestInfo = Request();
+     data : requestInfo
+  var res = $http.get('http://ec2-35-173-231-185.compute-1.amazonaws.com:3000/api/Bank/',requestDisplay).then((function(data,status,
+headers,config) {
+console.log("success in loading banks");
+for(var i=0;i<data.data.length;i++){   
+$scope.Banks.push(data.data[i]);
+$scope.Banks[i].cashCurrency = "USD";
+}
+$scope.loadCoinValue();
+$scope.loadCashValue();
+}),(function(data,status,headers,config) {  
+}));
+};
+$scope.loadBanks();
+
+$scope.loadCoinValue = function()
+{
+    var result = $q.defer();
+    //setTimeout(result.resolve,$scope.Residents*100000);
+    for(var j=0;j<$scope.Banks.length;j++){       
+    var id = $scope.Banks[j].bankID;
+     
+    var res = $http.get('http://ec2-35-173-231-185.compute-1.amazonaws.com:3000/api/Coins/CO_'+id).then(function successCallback(response) {
+        result.resolve(response)
+$scope.coinValue.push(response.data.value);
+$scope.coinID.push(response.data.coinsID);
+
+if($scope.Banks.length == $scope.coinValue.length)
+{
+    $scope.insertCoins();
+}
+return result.promise;
+},(function(data,status,headers,config) {
+}));
+}
+
+}
+$scope.insertCoins = function()
+{
+    for(var m=0;m<$scope.Banks.length;m++){
+         mySubStringCoin = $scope.Banks[m].coins.substring($scope.Banks[m].coins.lastIndexOf("#") + 1);
+        if($scope.coinID[m] == mySubStringCoin)  
+        {
+      
+        $scope.Banks[m].coins = $scope.coinValue[m];
+        }
+      }
+    
+}
+
+$scope.loadCashValue = function()
+{
+    var result = $q.defer();
+    setTimeout(result.resolve,$scope.Banks*100000);
+    for(var j=0;j<$scope.Banks.length;j++){       
+    var id = $scope.Banks[j].bankID;
+     
+    var res = $http.get('http://ec2-35-173-231-185.compute-1.amazonaws.com:3000/api/Cash/CA_'+id).then(function successCallback(response) {
+        result.resolve(response)
+$scope.cashValue.push(response.data.value);
+$scope.cashID.push(response.data.cashID);
+
+if($scope.Banks.length == $scope.cashValue.length)
+{
+    $scope.insertCash();
+}
+return result.promise;
+},(function(data,status,headers,config) {
+}));
+}
+}
+$scope.insertCash = function()
+{
+    for(var m=0;m<$scope.Banks.length;m++){
+         mySubStringCash = $scope.Banks[m].cash.substring($scope.Banks[m].cash.lastIndexOf("#") + 1);
+        if($scope.cashID[m] == mySubStringCash)  
+        {
+      
+        $scope.Banks[m].cash = $scope.cashValue[m];
+        }
+      }
+    
+}
+
+function Request() {
+ 
+  return {
+ 
+
+  "$class": "org.decentralized.energy.network.Bank",
+  "bankID": "",
+  "name": "",
+  "coins": "",
+  "cash": "",
+  }
+  };
+}]);
+ 
+</script>
+ 
+</html>

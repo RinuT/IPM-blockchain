@@ -1,0 +1,278 @@
+<html>
+<head>              
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">	
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
+</head>
+
+<body class="manufacturer_wrapper">
+<div ng-app="myApp" ng-controller="myCtrl" >
+        <div class="right_content_block col-md-9">
+                <div class="alert alert-success" ng-show="sucess">
+                        Resident added sucessfully
+                        <p id="demo"></p>
+                      </div>
+                      <div class="alert alert-danger" ng-show="failuer">
+                        Could not add Resident. Resident with same  ID exist. 
+                      </div>      
+        <h2> Add Resident </h2>
+  <form>
+        <span class="fields_design col-md-6">
+            <label>Resident ID</label>
+            <input type="text" value="Enter Resident ID"ng-model="residentID"/>
+        </span>
+        
+        <span class="fields_design col-md-6">
+            <label>First Name</label>
+            <input type="text" value="Enter First Name"ng-model="firstName"/>
+        </span>
+        
+        <span class="fields_design col-md-6">
+            <label>Last Name</label>
+            <input type="text" value="Enter Last Name"ng-model="lastName"/>
+        </span>
+
+        <span class="fields_design col-md-6">
+                <label>Coin Balance</label>
+                <input type="text" value="Coin Balance"ng-model="coins"/>
+        </span>
+
+         <span class="fields_design col-md-6">
+            <label>Energy value</label>
+            <input type="text" value="Energy Value"ng-model="energy"/>
+        </span>
+  
+        <span class="fields_design col-md-6">
+                <label>Energy Units</label>
+                <select name="energyUnits" id="energyUnits" ng-model="energyUnits">
+                    <option value="kwh">kwh</option>
+                </select>
+                <!-- <input type="text" value="Energy Units" ng-model="energyUnits"/> -->
+        </span>
+
+        <span class="fields_design col-md-6">
+            <label>Cash Balance</label>
+            <input type="text" value="cash Balance"ng-model="cash"/>
+        </span>
+
+        <!-- <span class="fields_design col-md-6">
+                <label>Select odrer status </label>
+                <select  id="mySelect">
+                    <option value="RECEIVED_BY_DISTRIBUTER">RECEIVED_BY_DISTRIBUTER</option>
+                    <option value="SHIPPED_BY_DISTRIBUTER">SHIPPED_BY_DISTRIBUTER</option>
+                </select>
+            </span> -->
+
+    
+        <span class="fields_design col-md-6">
+            <label>Cash Currency</label>
+            <select name="cashCurrency" id="cashCurrency" ng-model="cashCurrency">
+                <option value="USD">USD</option>
+            </select>
+            <!-- <input type="text" value="Cash Currency"ng-model="cashCurrency"/>  -->
+        </span>
+        
+        <div class="clearfix"></div>
+        
+        <!-- <div class="component">
+            <label>Composition</label>
+            <table class="normal_table">
+            <tr ng-repeat="m in Customers">
+                <td >{{m.components}}</td>
+                
+                <td ><input type="button" ng-click="Remove($index)" value="Remove" /></td>
+            </tr>
+            <tr>
+                <td ><input type="text" ng-model="components" /></td>
+                <td ><input type="button" ng-click="Add()" value="Add" /></td>
+            </tr>
+        </table>
+        </div> -->
+        
+        <!-- <div class="clearfix"></div> -->
+        
+        <div class="submit_block">
+            <input type="button" value="Submit" class="submit_btn_cmn"ng-click="Add()"/>
+        </div>
+    </form>
+        </div>
+</div>
+
+
+</body>
+<script>
+var app = angular.module('myApp', []);
+app.controller('myCtrl',['$scope','$http','$q','$timeout',function ($scope,$http,$q,$timeout) {
+
+$scope.failuer=false;
+    $scope.sucess=false;
+  $scope.transactionId="";
+    $scope.coinValue=[];
+    $scope.cashValue=[];
+    $scope.energyValue=[];
+    $scope.coinID=[];
+    $scope.cashID = [];
+    $scope.energyID=[]
+    var mySubStringCoin=""
+    var mySubStringCash=""
+    var mySubStringEnergy=""
+  
+  $scope.index=""
+ $scope.residentID="";
+ $scope.residentIDup="";
+ $scope.firstNameDup="";
+ $scope.lastNameDup="";
+ $scope.firstName="";
+ $scope.lastName="";
+ $scope.coins="";
+ $scope.energy="";
+ $scope.energyUnits="";
+ $scope.cash="";
+ $scope.cashCurrency="";
+ $scope.Residents = []
+ $scope.ResidentsResponse=[]
+ 
+  
+  $scope.Add = function(){
+ var residentinner = {}
+ residentinner.residentID = $scope.residentID
+ residentinner.firstName = $scope.firstName
+ residentinner.lastName = $scope.lastName
+ residentinner.coins = $scope.coins
+ residentinner.energy = $scope.energy
+ residentinner.energyUnits = $scope.energyUnits
+ residentinner.cash = $scope.cash
+ residentinner.cashCurrency =$scope.cashCurrency
+ $scope.Residents.push(residentinner)
+ $scope.message = "Product have been created sucessfully";
+ 
+ $scope.setValue();
+ $scope.residentIDup= $scope.residentID
+ $scope.firstNameDup= $scope.firstName
+ $scope.lastNameDup= $scope.lastName
+ $scope.coinsDup=$scope.coins
+ $scope.energyDup=$scope.energy
+ $scope.energyUnitsDup=$scope.energyUnits
+ $scope.cashDup=$scope.cash
+ $scope.cashCurrencyDup=$scope.cashCurrency
+ 
+ $scope.residentID="";
+ $scope.firstName="";
+ $scope.lastName="";
+ $scope.coins="";
+ $scope.energy="";
+ $scope.energyUnits="";
+ $scope.cash="";
+ $scope.cashCurrency="";
+}
+
+$scope.setValue=function() {
+    var request={      
+   "$class": "org.decentralized.energy.network.Resident",
+  "residentID": $scope.residentID,
+  "firstName": $scope.firstName,
+  "lastName": $scope.lastName,
+  "coins": "resource:org.decentralized.energy.network.Coins#CO_"+$scope.residentID,
+  "cash": "resource:org.decentralized.energy.network.Cash#CA_"+$scope.residentID,
+  "energy": "resource:org.decentralized.energy.network.Energy#EN_"+$scope.residentID
+}
+     var requestInfo = Request();  
+     data : requestInfo
+  var res = $http.post('http://ec2-35-173-231-185.compute-1.amazonaws.com:3000/api/Resident',request).then(function successCallback(response){
+           $scope.update_response=response;
+           $scope.addCoins();
+
+       }, function errorCallback(response){
+           console.log("POST-ing of data failed");
+           $scope.failuer=true;
+       });
+}
+$scope.addCoins = function() {
+       var requestAddCoins={
+         "$class": "org.decentralized.energy.network.Coins",
+          "coinsID":"CO_" + $scope.residentIDup,
+          "value":$scope.coinsDup,
+          "ownerID":$scope.residentIDup,
+          "ownerEntity":'Resident'
+    };
+    var requestInfo = Request();
+     data : requestInfo
+  var res = $http.post('http://ec2-35-173-231-185.compute-1.amazonaws.com:3000/api/Coins',requestAddCoins).then((function(data,status,
+headers,config) {
+console.log("successfully added resident with id"+$scope.residentIDup +"to coin asset");
+for(var i=0;i<data.data.length;i++){
+$scope.ResidentsResponse.push(data.data[i]);
+
+
+}
+$scope.addEnergy();
+}),(function(data,status,headers,config) { 
+    $scope.failuer=true;    
+}));
+}
+$scope.addCash = function() {
+       var requestAddCash={
+         "$class": "org.decentralized.energy.network.Cash",
+          "cashID":"CA_" + $scope.residentIDup,
+          "currency":$scope.cashCurrencyDup,
+          "value":$scope.cashDup,
+          "ownerID":$scope.residentIDup,
+          "ownerEntity":'Resident'  
+    };
+    var requestInfo = Request();
+     data : requestInfo
+  var res = $http.post('http://ec2-35-173-231-185.compute-1.amazonaws.com:3000/api/Cash',requestAddCash).then((function(data,status,
+headers,config) {
+console.log("successfully added resident with id"+$scope.residentIDup +"to cash asset");
+$scope.sucess=true
+for(var i=0;i<data.data.length;i++){
+$scope.ResidentsResponse.push(data.data[i]);
+}
+}),(function(data,status,headers,config) {
+    $scope.failuer=true;
+}));
+}
+$scope.addEnergy = function() {
+       var requestAddEnergy={
+          "$class": "org.decentralized.energy.network.Energy",
+          "energyID":"EN_" + $scope.residentIDup,
+          "units":$scope.energyUnitsDup,
+          "value":$scope.energyDup,
+          "ownerID":$scope.residentIDup,
+          "ownerEntity":'Resident'    
+    };
+    var requestInfo = Request();
+     data : requestInfo
+  var res = $http.post('http://ec2-35-173-231-185.compute-1.amazonaws.com:3000/api/Energy',requestAddEnergy).then((function(data,status,
+headers,config) {
+console.log("successfully added resident with id"+$scope.residentIDup +"to energy asset");
+for(var i=0;i<data.data.length;i++){
+$scope.ResidentsResponse.push(data.data[i]);
+}
+
+ $scope.addCash();
+}),(function(data,status,headers,config) {
+    $scope.failuer=true;
+}));
+}
+ 
+function Request() {
+ 
+  return {
+  "$class": "org.decentralized.energy.network.Resident",
+  "residentID": "",
+  "firstName": "",
+  "lastName": "",
+  "coins": "",
+  "cash": "",
+  "energy": ""
+  }
+  };
+}]);
+ 
+</script>
+ 
+</html>

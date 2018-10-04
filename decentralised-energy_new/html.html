@@ -1,0 +1,1170 @@
+<html>
+
+<head>
+
+<link
+rel="stylesheet"href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0-beta/css/materialize.min.css">
+
+<!-- Compiled and minified JavaScript -->
+
+<script
+src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0-beta/js/materialize.min.js"></script>
+
+<script
+src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+
+<script
+src="https://rawgit.com/gdi2290/angular-websocket/v1.0.9/angular-websocket.js"></script>
+
+<script
+src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+
+<link
+href="https://fonts.googleapis.com/icon?family=Material+Icons"
+rel="stylesheet">
+
+<style>
+
+select{
+
+display: 
+inline;
+
+}
+
+body {font-family:
+Arial;}
+
+div#envelope{
+
+width: 70%;
+
+margin: 10px
+30% 10px
+25%;
+
+padding:10px
+0;
+
+border: 2px
+solid gray;
+
+height: 120%;
+
+}
+
+
+</style>
+
+</head>
+
+
+
+<body
+ng-init="loadResidents()">
+
+<div
+ng-app="myApp"
+ng-controller="myCtrl"
+>
+
+<div
+id="envelope">
+
+<h4><b> ADD RESIDENT
+</b></h4>
+
+<div>
+
+<table
+id="table"style="width:100%">
+
+
+
+<tr
+class="thead-cols">
+
+<th
+class="bc">ID</th>
+
+<th
+class="bc"
+>First Name</th>
+
+<th
+class="bc"
+>Last Name</th>
+
+<th
+class="bc">Coins Balance</th>
+
+<th
+class="bc">Energy Value</th>
+
+<th
+class="bc">Energy Units</th>
+
+<th
+class="bc">Cash Balance</th>
+
+<th
+class="bc">Cash Currency</th>
+
+<th
+class="bc">Actions</th>
+
+</tr>
+
+
+<tr
+ng-repeat="resident in Residents">
+
+<td><div
+ng-show="Residents[$index]">{{resident.residentID}}</div></td>
+
+<td><div
+ng-show="Residents[$index]">{{resident.firstName}}</div></td>
+
+<td><div
+ng-show="Residents[$index]">{{resident.lastName}}</div></td>
+
+<td><div
+ng-show="Residents[$index]">{{resident.coins}}</div></td>
+
+<td><div
+ng-show="Residents[$index]">{{resident.energy}}</div></td>
+
+<td><div
+ng-show="Residents[$index]">{{resident.energyUnits}}</div></td>
+
+<td><div
+ng-show="Residents[$index]">{{resident.cash}}</div></td>
+
+<td><div
+ng-show="Residents[$index]">{{resident.cashCurrency}}</div></td>
+
+<td><div
+ng-show="Residents[$index]"><input
+type="button"
+ng-click="Remove($index)"
+value="Remove" /></div></td>
+
+<td><div
+ng-show="Residents[$index]"><input
+type="button"ng-attr-id="{{ 'myBtn-' + $index }}"
+ng-click="openUpdate($index)"value="Update" /></div></td>
+
+<!-- <button id="myBtn">Open Modal</button> -->
+
+</tr>
+
+<!-- The Modal -->
+
+<div
+id="myModal"
+class="modal"
+>
+
+<!-- Modal content -->
+
+<div
+class="modal-content"
+>
+
+<span
+class="close">&times;</span>
+
+<div
+class="form-group text-left">
+
+<input
+type="text"
+name="residentID"
+placeholder="resident ID"
+ng-model="residentIDup"
+readonly>
+
+</div>
+
+<div
+class="form-group text-left">
+
+<input
+type="text"
+name="firstName"
+placeholder="first Name"
+ng-model="firstNameDup">
+
+</div>
+
+<div
+class="form-group text-left">
+
+<input
+type="text"
+name="lastName"
+placeholder="last NAME"
+ng-model="lastNameDup">
+
+</div>
+
+<input
+type="button"
+ng-click="Update()"
+value="Submit" />
+
+</div>
+
+<td><input
+type="text"
+id="residentID"
+ng-model="residentID" /></td>
+
+<td><input
+type="text"
+ng-model="firstName"
+id="firstName" /></td>
+
+<td><input
+type="text"
+ng-model="lastName"
+id="lastName"/></td>
+
+<td><input
+type="text"
+ng-model="coins" /></td>
+
+<td><input
+type="text"
+ng-model="energy" /></td>
+
+<td><select
+name="energyUnits"
+id="energyUnits"
+ng-model="energyUnits"> /><option
+value="kwh">kwh</option></select>
+</td>
+
+<td><input
+type="text"
+ng-model="cash" /></td>
+
+<td><select
+name="cashCurrency"
+id="cashCurrency"
+ng-model="cashCurrency"> /><option
+value="USD">USD</option></select>
+</td>
+
+<td><input
+type="button"
+ng-click="Add()"
+value="Add" /></td>
+
+</table>
+
+</div>
+
+</div>
+
+<div
+ng-show="sucess"></div>
+
+Registered with transaction Id {{transactionId}}
+
+</div>
+
+</div>
+
+
+
+<div
+ng-app="myApp"
+ng-controller="myUpdateCtrl">
+
+
+
+
+
+
+
+</div>
+
+
+
+</body>
+
+<script>
+
+var app =
+angular.module('myApp', []);
+
+app.controller('myCtrl',['$scope','$http','$q','$timeout',function
+ ($scope,$http,$q,$timeout) {
+
+
+$scope.coinValue=[];
+
+$scope.cashValue=[];
+
+$scope.energyValue=[];
+
+$scope.coinID=[];
+
+var mySubStringCoin=""
+
+$scope.sucess=false
+
+$scope.transactionId="";
+
+$scope.index=""
+
+$scope.residentID="";
+
+$scope.residentIDup="";
+
+$scope.firstNameDup="";
+
+$scope.lastNameDup="";
+
+$scope.firstName="";
+
+$scope.lastName="";
+
+$scope.coins="";
+
+$scope.energy="";
+
+$scope.energyUnits="";
+
+$scope.cash="";
+
+$scope.cashCurrency="";
+
+$scope.Residents = []
+
+$scope.ResidentsResponse=[]
+
+
+
+$scope.Add =
+function(){
+
+var residentinner = {}
+
+residentinner.residentID =
+$scope.residentID
+
+residentinner.firstName =
+$scope.firstName
+
+residentinner.lastName =
+$scope.lastName
+
+residentinner.coins =
+$scope.coins
+
+residentinner.energy =
+$scope.energy
+
+residentinner.energyUnits =
+$scope.energyUnits
+
+residentinner.cash =
+$scope.cash
+
+residentinner.cashCurrency =$scope.cashCurrency
+
+$scope.Residents.push(residentinner)
+
+$scope.message =
+"Product have been created sucessfully";
+
+
+$scope.setValue();
+
+$scope.residentIDup=
+$scope.residentID
+
+$scope.firstNameDup=
+$scope.firstName
+
+$scope.lastNameDup=
+$scope.lastName
+
+$scope.coinsDup=$scope.coins
+
+$scope.energyDup=$scope.energy
+
+$scope.energyUnitsDup=$scope.energyUnits
+
+$scope.cashDup=$scope.cash
+
+$scope.cashCurrencyDup=$scope.cashCurrency
+
+
+$scope.residentID="";
+
+$scope.firstName="";
+
+$scope.lastName="";
+
+$scope.coins="";
+
+$scope.energy="";
+
+$scope.energyUnits="";
+
+$scope.cash="";
+
+$scope.cashCurrency="";
+
+}
+
+$scope.Remove =
+function (index) {
+
+//Find the record using Index from Array.
+
+var id =
+$scope.Residents[index].residentID;
+
+$scope.Residents.splice(index,
+1);
+
+var del =
+"/" + (index +
+1);
+
+var requestInfo =
+Request();
+
+data : requestInfo
+
+var res =
+$http.delete('http://ec2-35-173-231-185.compute-1.amazonaws.com:3000/api/Resident/'+id,del).then((function(response)
+ {
+
+console.log("success");
+
+}),(function(data,status,headers,config) {
+
+alert( "No product with specified UUID");
+
+}));
+
+
+var delCoins =
+"/" + (index +
+1);
+
+console.log(delCoins)
+
+var res =
+$http.delete('http://ec2-35-173-231-185.compute-1.amazonaws.com:3000/api/Coins/'+"CO_"+id,delCoins).then((function(response)
+ {
+
+console.log("success deleting coins asset");
+
+}),(function(data,status,headers,config) {
+
+alert( "No product with specified UUID");
+
+}));
+
+console.log(delCoins)
+
+var res =
+$http.delete('http://ec2-35-173-231-185.compute-1.amazonaws.com:3000/api/Energy/'+"EN_"+id,del).then((function(response)
+ {
+
+console.log("success deleting Energy asset");
+
+}),(function(data,status,headers,config) {
+
+alert( "No product with specified UUID");
+
+}));
+
+var res =
+$http.delete('http://ec2-35-173-231-185.compute-1.amazonaws.com:3000/api/Cash/'+"CA_"+id,del).then((function(response)
+ {
+
+console.log("success deleting Energy asset");
+
+}),(function(data,status,headers,config) {
+
+alert( "No product with specified UUID");
+
+}));
+
+}
+
+$scope.openUpdate =
+function (index)
+
+{
+
+
+var table =
+document.getElementById("table"),
+index;
+
+for(var
+i=0; 
+i<table.rows.length;
+i++)
+
+{
+
+table.rows[i].onclick =
+function()
+
+{
+
+rindex=this.rowIndex;
+
+console.log(rindex);
+
+$scope.residentIDup =
+this.cells[0].innerText;
+
+$scope.firstNameDup=this.cells[1].innerText;
+
+$scope.lastNameDup=this.cells[2].innerText;
+
+// console.log( document.getElementById("residentID").value)
+
+};
+
+}
+
+$scope.index=index;
+
+var modal =""
+
+var btn =""
+
+var span=""
+
+modal = document.getElementById('myModal');
+
+// Get the button that opens the modal
+
+btn = document.getElementById("myBtn-"+index);
+
+// Get the <span> element that closes the modal
+
+span = document.getElementsByClassName("close")[0];
+
+// When the user clicks the button, open the modal
+
+btn.onclick =
+function() {
+
+modal.style.display =
+"block";
+
+}
+
+$scope.message =
+"Product have been updated sucessfully";
+
+// When the user clicks on <span> (x), close the modal
+
+span.onclick =
+function() {
+
+modal.style.display =
+"none";
+
+
+$scope.residentIDup=""
+
+$scope.firstNameDup=""
+
+$scope.lastNameDup=""
+
+} 
+
+}
+
+$scope.loadResidents =
+function() {
+
+
+var requestDisplay={
+
+"$class":
+"org.decentralized.energy.network.Resident",
+
+"residentID":
+$scope.residentID,
+
+"firstName":
+$scope.firstName,
+
+"lastName":
+$scope.lastName,
+
+"coins":
+"resource:org.decentralized.energy.network.Coins#"+"CO_"+$scope.residentID,
+
+"cash":
+"resource:org.decentralized.energy.network.Cash#"+"CA_"+$scope.residentID,
+
+"energy":
+"resource:org.decentralized.energy.network.Energy#"+"EN_"+$scope.residentID
+
+} 
+
+var requestInfo =
+Request();
+
+data : requestInfo
+
+var res =
+$http.get('http://ec2-35-173-231-185.compute-1.amazonaws.com:3000/api/Resident/',requestDisplay).then((function(data,status,
+
+headers,config) {
+
+console.log("success");
+
+for(var
+i=0;i<data.data.length;i++){
+
+
+$scope.Residents.push(data.data[i]);
+
+$scope.Residents[i].energyUnits =
+"Kwh";
+
+$scope.Residents[i].cashCurrency =
+"USD";
+
+}
+
+$scope.loadCoinValue();
+
+$scope.loadCashValue();
+
+$scope.loadEnergyValue();
+
+}),(function(data,status,headers,config) {
+
+
+alert( "cannot display data");
+
+}));
+
+};
+
+$scope.loadResidents();
+
+$scope.loadCoinValue =
+function()
+
+{
+
+var result =
+$q.defer();
+
+
+for(var
+j=0;j<$scope.Residents.length;j++){
+
+setTimeout(result.resolve,
+$scope.Residents[j]*10000);
+
+var id =
+$scope.Residents[j].residentID;
+
+
+var res =
+$http.get('http://ec2-35-173-231-185.compute-1.amazonaws.com:3000/api/Coins/CO_'+id).
+
+then(function
+successCallback(response) {
+
+result.resolve(response)
+
+$scope.coinValue.push(response.data.value);
+
+$scope.coinID.push(response.data.coinsID);
+
+
+
+if($scope.Residents.length ==
+$scope.coinValue.length)
+
+{
+
+$scope.insertCoins();
+
+}
+
+return result.promise;
+
+},(function(data,status,headers,config) {
+
+// deferred.reject(data)
+
+return result.promise();
+
+alert( "No product with specified UUID");
+
+}));
+
+}
+
+
+
+console.log($scope.coinValue)
+
+console.log($scope.coinID);
+
+}
+
+$scope.insertCoins =
+function()
+
+{
+
+for(var
+m=0;m<$scope.Residents.length;m++){
+
+mySubStringCoin = 
+$scope.Residents[m].coins.substring($scope.Residents[m].coins.lastIndexOf("#")
+ + 1);
+
+console.log($scope.coinID[m])
+
+console.log(mySubStringCoin)
+
+console.log($scope.coinValue[m])
+
+if($scope.coinID[m] ==
+mySubStringCoin) 
+
+{
+
+
+$scope.Residents[m].coins =
+$scope.coinValue[m];
+
+}
+
+}
+
+
+}
+
+$scope.loadCashValue =
+function()
+
+{
+
+for(var
+j=0;j<$scope.Residents.length;j++){
+
+var id =
+$scope.Residents[j].residentID;
+
+var res =
+$http.get('http://ec2-35-173-231-185.compute-1.amazonaws.com:3000/api/Cash/'+"CA_"+id).then((function(response)
+ {
+
+console.log("success deleting coins asset");
+
+$scope.cashValue.push(response.data.value);
+
+$scope.insertCash();
+
+}),(function(data,status,headers,config) {
+
+alert( "No product with specified UUID");
+
+}));
+
+}
+
+}
+
+$scope.insertCash =
+function()
+
+{
+
+for(var
+m=0;m<$scope.cashValue.length;m++)
+
+{
+
+$scope.Residents[m].cash =
+$scope.cashValue[m];
+
+}
+
+}
+
+$scope.loadEnergyValue =
+function()
+
+{
+
+for(var
+j=0;j<$scope.Residents.length;j++){
+
+var id =
+$scope.Residents[j].residentID;
+
+var res =
+$http.get('http://ec2-35-173-231-185.compute-1.amazonaws.com:3000/api/Energy/'+"EN_"+id).then((function(response)
+ {
+
+console.log("success deleting coins asset");
+
+$scope.energyValue.push(response.data.value);
+
+$scope.insertEnergy();
+
+}),(function(data,status,headers,config) {
+
+alert( "No product with specified UUID");
+
+}));
+
+}
+
+}
+
+$scope.insertEnergy =
+function()
+
+{
+
+for(var
+m=0;m<$scope.energyValue.length;m++)
+
+{
+
+$scope.Residents[m].energy =
+$scope.energyValue[m];
+
+}
+
+}
+
+$scope.Update =
+function () {
+
+//var resID = $scope.Residents[index].residentID;
+
+$scope.Residents[$scope.index].firstName=$scope.firstNameDup;
+
+$scope.Residents[$scope.index].lastName=$scope.lastNameDup;
+
+
+var requestUp={
+
+"$class":
+"org.decentralized.energy.network.Resident",
+
+//"residentID": $scope.residentIDup,
+
+"firstName":
+$scope.firstNameDup,
+
+"lastName":
+$scope.lastNameDup,
+
+"coins":
+"resource:org.decentralized.energy.network.Coins#"+"CO_"+$scope.residentID,
+
+"cash":
+"resource:org.decentralized.energy.network.Cash#"+"CA_"+$scope.residentID,
+
+"energy":
+"resource:org.decentralized.energy.network.Energy#"+"EN_"+$scope.residentID
+
+} 
+
+var requestInfo =
+Request();
+
+data : requestInfo
+
+var res =
+$http.put('http://ec2-35-173-231-185.compute-1.amazonaws.com:3000/api/Resident/'+$scope.residentIDup,requestUp).then(function
+successCallback(response){
+
+alert("Successfully added new batch");
+
+$scope.update_response=response;
+
+$scope.sucess=true
+
+$scope.transactionId=$scope.update_response.data.transactionId
+
+}, function 
+errorCallback(response){
+
+console.log("PUT-ing of data failed");
+
+});
+
+}
+
+$scope.setValue=function() {
+
+var request={
+
+"$class":
+"org.decentralized.energy.network.Resident",
+
+"residentID":
+$scope.residentID,
+
+"firstName":
+$scope.firstName,
+
+"lastName":
+$scope.lastName,
+
+"coins":
+"resource:org.decentralized.energy.network.Coins#CO_"+$scope.residentID,
+
+"cash":
+"resource:org.decentralized.energy.network.Cash#CA_"+$scope.residentID,
+
+"energy":
+"resource:org.decentralized.energy.network.Energy#EN_"+$scope.residentID
+
+}
+
+var requestInfo =
+Request();
+
+
+data : requestInfo
+
+
+var res =
+$http.post('http://ec2-35-173-231-185.compute-1.amazonaws.com:3000/api/Resident',request).then(function
+successCallback(response){
+
+alert("Successfully added new batch");
+
+$scope.update_response=response;
+
+$scope.sucess=true
+
+$scope.transactionId=$scope.update_response.data.transactionId
+
+$scope.addCoins();
+
+}, function 
+errorCallback(response){
+
+console.log("POST-ing of data failed");
+
+});
+
+}
+
+$scope.addCoins =
+function() {
+
+var requestAddCoins={
+
+"$class":
+"org.decentralized.energy.network.Coins",
+
+"coinsID":"CO_" +
+$scope.residentIDup,
+
+"value":$scope.coinsDup,
+
+"ownerID":$scope.residentIDup,
+
+"ownerEntity":'Resident'
+
+};
+
+var requestInfo =
+Request();
+
+data : requestInfo
+
+var res =
+$http.post('http://ec2-35-173-231-185.compute-1.amazonaws.com:3000/api/Coins',requestAddCoins).then((function(data,status,
+
+headers,config) {
+
+console.log("success");
+
+for(var
+i=0;i<data.data.length;i++){
+
+$scope.ResidentsResponse.push(data.data[i]);
+
+console.log($scope.ResidentsResponse)
+
+}
+
+$scope.addEnergy();
+
+}),(function(data,status,headers,config) {
+
+
+alert( "cannot display data");
+
+}));
+
+}
+
+$scope.addCash =
+function() {
+
+var requestAddCash={
+
+"$class":
+"org.decentralized.energy.network.Cash",
+
+"cashID":"CA_" +
+$scope.residentIDup,
+
+"currency":$scope.cashCurrencyDup,
+
+"value":$scope.cashDup,
+
+"ownerID":$scope.residentIDup,
+
+"ownerEntity":'Resident'
+
+};
+
+var requestInfo =
+Request();
+
+data : requestInfo
+
+var res =
+$http.post('http://ec2-35-173-231-185.compute-1.amazonaws.com:3000/api/Cash',requestAddCash).then((function(data,status,
+
+headers,config) {
+
+console.log("success");
+
+for(var
+i=0;i<data.data.length;i++){
+
+$scope.ResidentsResponse.push(data.data[i]);
+
+console.log($scope.ResidentsResponse)
+
+}
+
+}),(function(data,status,headers,config) {
+
+
+alert( "cannot display data");
+
+}));
+
+}
+
+$scope.addEnergy =
+function() {
+
+var requestAddEnergy={
+
+"$class":
+"org.decentralized.energy.network.Energy",
+
+"energyID":"EN_" +
+$scope.residentIDup,
+
+"units":$scope.energyUnitsDup,
+
+"value":$scope.energyDup,
+
+"ownerID":$scope.residentIDup,
+
+"ownerEntity":'Resident'
+
+};
+
+var requestInfo =
+Request();
+
+data : requestInfo
+
+var res =
+$http.post('http://ec2-35-173-231-185.compute-1.amazonaws.com:3000/api/Energy',requestAddEnergy).then((function(data,status,
+
+headers,config) {
+
+console.log("success");
+
+for(var
+i=0;i<data.data.length;i++){
+
+$scope.ResidentsResponse.push(data.data[i]);
+
+console.log($scope.ResidentsResponse)
+
+}
+
+$scope.addCash();
+
+}),(function(data,status,headers,config) {
+
+
+alert( "cannot display data");
+
+}));
+
+}
+
+
+function 
+Request() {
+
+
+return {
+
+"$class":
+"org.decentralized.energy.network.Resident",
+
+"residentID":
+"",
+
+"firstName":
+"",
+
+"lastName":
+"",
+
+"coins":
+"",
+
+"cash":
+"",
+
+"energy":
+""
+
+}
+
+};
+
+}]);
+
+
+</script>
+
+
+</html>
+
+

@@ -1,0 +1,356 @@
+<html>
+<head>              
+<link rel="stylesheet"href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0-beta/css/materialize.min.css">
+<!-- Compiled and minified JavaScript -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0-beta/js/materialize.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+<script src="https://rawgit.com/gdi2290/angular-websocket/v1.0.9/angular-websocket.js"></script>
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script> 
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<style>
+  select{
+      display: inline;
+  }
+     body {font-family: Arial;}
+     div#envelope{
+     width: 70%;
+     margin: 10px 30% 10px 25%;
+     padding:10px 0;
+     border: 2px solid gray;
+     height: 120%;
+     }
+   
+   </style>
+</head>
+
+<body ng-init="loadUtilityCompanies()">
+<div ng-app="myApp" ng-controller="myCtrl" >
+      <div id="envelope">
+        <h4><b> Utility Companies </b></h4>
+        <div>
+        <table id="table"style="width:100%">
+
+        <tr class="thead-cols">          
+            <th class="bc">ID</th>        
+            <th class="bc" >Name</th>
+            <th class="bc">Coins Balance</th>  
+            <th class="bc">Energy Value</th>
+            <th class="bc">Energy Units</th>
+            <th class="bc">Actions</th>       
+      </tr>
+        
+            <tr ng-repeat="utility in Utility">
+                <td><div ng-show="Utility[$index]">{{utility.utilityID}}</div></td>           
+                <td><div ng-show="Utility[$index]">{{utility.name}}</div></td>            
+                <td><div ng-show="Utility[$index]">{{utility.coins}}</div></td>
+                <td><div ng-show="Utility[$index]">{{utility.energy}}</div></td>
+                <td><div ng-show="Utility[$index]">{{utility.energyUnits}}</div></td>
+                <td><div ng-show="Utility[$index]"><input type="button" ng-click="Remove($index)" value="Remove" /></div></td>
+                <td><div ng-show="Utility[$index]"><input type="button"ng-attr-id="{{ 'myBtn-' + $index }}" ng-click="openUpdate($index)"value="Update" /></div></td>
+                <!-- <button id="myBtn">Open Modal</button> -->
+            </tr>   
+<!-- The Modal -->
+<div id="myModal" class="modal" >
+  <!-- Modal content -->
+  <div class="modal-content" >
+    <span class="close">&times;</span>    
+        <div class="form-group text-left">
+            <input type="text" name="utilityID" placeholder="utility ID" ng-model="utilityIDup" readonly>    
+        </div>          
+        <div class="form-group text-left">
+          <input type="text" name="name" placeholder="name" ng-model="nameDup">       
+        </div>
+          <input type="button" ng-click="Update()" value="Submit" />
+  </div>
+    <td><input type="text" id="utilityID" ng-model="utilityID" /></td>
+          <td><input type="text" ng-model="name" id="name" /></td>
+          <td><input type="text" ng-model="coins" /></td>
+          <td><input type="text" ng-model="energy" /></td>
+          <td><select name="energyUnits" id="energyUnits" ng-model="energyUnits"> /><option value="kwh">kwh</option></select> </td>
+          <td><input type="button" ng-click="Add()" value="Add" /></td>
+      </table>
+        </div>
+        </div>
+        <div ng-show="sucess"></div>
+          Registered with transaction Id {{transactionId}}
+        </div> 
+</div>
+</body>
+
+
+<script>
+var app = angular.module('myApp', []);
+app.controller('myCtrl',['$scope','$http','$timeout',function ($scope,$http,$timeout) {
+  
+  $scope.sucess=false
+  $scope.transactionId="";
+  $scope.index=""
+ $scope.utilityID="";
+ $scope.utilityIDup="";
+ $scope.nameDup="";
+ $scope.name="";
+ $scope.coins="";
+ $scope.energy="";
+ $scope.energyUnits="";
+ $scope.Utility = []
+ $scope.UtilityResponse=[]
+ 
+  
+  $scope.Add = function(){
+ var utilityinner = {}
+ utilityinner.utilityID = $scope.utilityID
+ utilityinner.name = $scope.name
+ utilityinner.coins = $scope.coins
+ utilityinner.energy = $scope.energy
+ utilityinner.energyUnits = $scope.energyUnits
+ $scope.Utility.push(utilityinner)
+ $scope.message = "Product have been created sucessfully";
+ $scope.setValue();
+ $scope.addCoins();
+ $scope.addEnergy();
+ $scope.utilityIDup= $scope.utilityID
+ $scope.nameDup= $scope.name
+ $scope.coinsDup=$scope.coins
+ $scope.energyDup=$scope.energy
+ $scope.energyUnitsDup=$scope.energyUnits
+ 
+ $scope.utilityID="";
+ $scope.name="";
+ $scope.coins="";
+ $scope.energy="";
+ $scope.energyUnits="";
+}
+ $scope.Remove = function (index) {
+     //Find the record using Index from Array.
+     var id = $scope.Utility[index].residentID;
+         $scope.Utility .splice(index, 1);
+    var del = "/" + (index + 1);
+     var requestInfo = Request();
+     data : requestInfo
+  var res = $http.delete('http://ec2-35-173-231-185.compute-1.amazonaws.com:3000/api/UtilityCompany/'+id,del).then((function(response) {
+console.log("success");
+}),(function(data,status,headers,config) {
+alert( "No product with specified UUID");
+}));
+   
+var delCoins = "/" + (index + 1);
+console.log(delCoins)
+var res = $http.delete('http://ec2-35-173-231-185.compute-1.amazonaws.com:3000/api/Coins/'+"CO_"+id,delCoins).then((function(response) {
+console.log("success deleting coins asset");
+}),(function(data,status,headers,config) {
+alert( "No product with specified UUID");
+}));
+console.log(delCoins)
+var res = $http.delete('http://ec2-35-173-231-185.compute-1.amazonaws.com:3000/api/Energy/'+"EN_"+id,del).then((function(response) {
+console.log("success deleting Energy asset");
+}),(function(data,status,headers,config) {
+alert( "No product with specified UUID");
+}));
+var res = $http.delete('http://ec2-35-173-231-185.compute-1.amazonaws.com:3000/api/Cash/'+"CA_"+id,del).then((function(response) {
+console.log("success deleting Energy asset");
+}),(function(data,status,headers,config) {
+alert( "No product with specified UUID");
+}));
+ }
+$scope.openUpdate = function (index)
+{
+   
+    var table = document.getElementById("table"), index;
+for(var i=0; i<table.rows.length; i++)
+{
+    table.rows[i].onclick = function()
+    {
+        rindex=this.rowIndex;
+        console.log(rindex);
+        $scope.utilityIDup = this.cells[0].innerText;
+        $scope.nameDup=this.cells[1].innerText;
+        // console.log( document.getElementById("residentID").value)
+    };
+}
+    $scope.index=index;
+    var modal =""
+    var btn =""
+    var span=""
+  modal = document.getElementById('myModal');
+// Get the button that opens the modal
+btn = document.getElementById("myBtn-"+index);
+// Get the <span> element that closes the modal
+span = document.getElementsByClassName("close")[0];
+// When the user clicks the button, open the modal 
+btn.onclick = function() {
+    modal.style.display = "block";
+}
+$scope.message = "Product have been updated sucessfully";
+// When the user clicks on <span> (x), close the modal
+span.onclick = function() {
+    modal.style.display = "none";
+     
+    $scope.utilityID=""
+    $scope.nameDup=""
+} 
+}
+$scope.loadUtilityCompanies = function() {
+  var requestDisplay={
+     "$class": "org.decentralized.energy.network.UtilityCompany",
+    "utilityID": $scope.utilityID,
+    "name": $scope.name,
+    "coins": "resource:org.decentralized.energy.network.Coins#"+"CO_"+$scope.utilityID,
+    "energy": "resource:org.decentralized.energy.network.Energy#"+"EN_"+$scope.utilityID
+} 
+    var requestInfo = Request();
+     data : requestInfo
+  var res = $http.get('http://ec2-35-173-231-185.compute-1.amazonaws.com:3000/api/UtilityCompany/',requestDisplay).then((function(data,status,
+headers,config) {
+console.log("success");
+for(var i=0;i<data.data.length;i++){
+    
+$scope.Utility.push(data.data[i]);
+// var mySubStringCoin = $scope.Utility[i].coins.substring(
+//     $scope.Utility[i].coins.lastIndexOf("#") + 1);
+//     $scope.Utility[i].coins=mySubStringCoin
+// var mySubStringEnergy = $scope.Utility[i].energy.substring(
+//     $scope.Utility[i].energy.lastIndexOf("#") + 1);
+//     $scope.Utility[i].energy=mySubStringEnergy
+// $scope.Utility[i].energyUnits = "Kwh";
+// var mySubStringCash = $scope.Residents[i].cash.substring(
+//     $scope.Residents[i].cash.lastIndexOf("#") + 1);
+//     $scope.Residents[i].cash=mySubStringCash
+// $scope.Residents[i].cashCurrency = "USD";
+// console.log(mySubStringEnergy)
+console.log($scope.Utility)
+}
+}),(function(data,status,headers,config) {
+   
+alert( "cannot display data");
+}));
+};
+$scope.loadUtilityCompanies();
+ $scope.Update = function () {
+//var resID = $scope.Residents[index].residentID;
+$scope.Utility[$scope.index].name=$scope.nameDup;
+     
+var requestUp={
+   "$class": "org.decentralized.energy.network.UtilityCompany",
+    "utilityID": $scoe.utilityIDup,
+    "name": $scope.nameDup,
+    "coins": "resource:org.decentralized.energy.network.Coins#"+"CO_"+$scope.utilityID,
+    "energy": "resource:org.decentralized.energy.network.Energy#"+"EN_"+$scope.utilityID
+} 
+     var requestInfo = Request();
+     data : requestInfo
+  var res = $http.put('http://ec2-35-173-231-185.compute-1.amazonaws.com:3000/api/UtilityCompany/'+$scope.utilityIDup).then(function successCallback(response){
+           alert("Successfully added new batch");
+           $scope.update_response=response;
+           $scope.sucess=true
+           $scope.transactionId=$scope.update_response.data.transactionId
+       }, function errorCallback(response){
+           console.log("PUT-ing of data failed");
+       });
+ }
+$scope.setValue=function() {
+    var request={
+  
+        "$class": "org.decentralized.energy.network.UtilityCompany",
+    "utilityID": $scope.utilityID,
+    "name": $scope.name,
+    "coins": "resource:org.decentralized.energy.network.Coins#"+"CO_"+$scope.utilityID,
+    "energy": "resource:org.decentralized.energy.network.Energy#"+"EN_"+$scope.utilityID
+} 
+     var requestInfo = Request();
+   
+     data : requestInfo
+ 
+  var res = $http.post('http://ec2-35-173-231-185.compute-1.amazonaws.com:3000/api/UtilityCompany',request).then(function successCallback(response){
+           alert("Successfully added new batch");
+           $scope.update_response=response;
+           $scope.sucess=true
+           $scope.transactionId=$scope.update_response.data.transactionId
+       }, function errorCallback(response){
+           console.log("POST-ing of data failed");
+       });
+}
+$scope.addCoins = function() {
+       var requestAddCoins={
+         "$class": "org.decentralized.energy.network.Coins",
+          "coinsID":"CO_" + $scope.utilityID,
+          "value":$scope.coins,
+          "ownerID":$scope.utilityID,
+          "ownerEntity":'UtilityCompany'
+    };
+    var requestInfo = Request();
+     data : requestInfo
+  var res = $http.post('http://ec2-35-173-231-185.compute-1.amazonaws.com:3000/api/Coins',requestAddCoins).then((function(data,status,
+headers,config) {
+console.log("success");
+for(var i=0;i<data.data.length;i++){
+$scope.UtilityResponse.push(data.data[i]);
+console.log($scope.UtilityResponse)
+}
+}),(function(data,status,headers,config) {
+   
+alert( "cannot display data");
+}));
+}
+// $scope.addCash = function() {
+//        var requestAddCash={
+//          "$class": "org.decentralized.energy.network.Cash",
+//           "cashID":"CA_" + $scope.residentID,
+//           "currency":$scope.cashCurrency,
+//           "value":$scope.cash,
+//           "ownerID":$scope.residentID,
+//           "ownerEntity":'Resident'  
+//     };
+//     var requestInfo = Request();
+//      data : requestInfo
+//   var res = $http.post('http://ec2-35-173-231-185.compute-1.amazonaws.com:3000/api/Cash',requestAddCash).then((function(data,status,
+// headers,config) {
+// console.log("success");
+// for(var i=0;i<data.data.length;i++){
+// $scope.ResidentsResponse.push(data.data[i]);
+// console.log($scope.ResidentsResponse)
+// }
+// }),(function(data,status,headers,config) {
+   
+// alert( "cannot display data");
+// }));
+// }
+$scope.addEnergy = function() {
+       var requestAddEnergy={
+          "$class": "org.decentralized.energy.network.Energy",
+          "energyID":"EN_" + $scope.utilityID,
+          "units":$scope.energyUnits,
+          "value":$scope.energy,
+          "ownerID":$scope.utilityID,
+          "ownerEntity":'UtilityCompany'    
+    };
+    var requestInfo = Request();
+     data : requestInfo
+  var res = $http.post('http://ec2-35-173-231-185.compute-1.amazonaws.com:3000/api/Energy',requestAddEnergy).then((function(data,status,
+headers,config) {
+console.log("success");
+for(var i=0;i<data.data.length;i++){
+$scope.UtilityResponse.push(data.data[i]);
+console.log($scope.UtilityResponse)
+}
+}),(function(data,status,headers,config) {
+   
+alert( "cannot display data");
+}));
+}
+ 
+function Request() {
+ 
+  return {
+    "$class": "org.decentralized.energy.network.UtilityCompany",
+    "utilityID": "",
+    "name": "",
+    "coins": "",
+    "energy": ""
+  
+  }
+  };
+}]);
+ 
+</script>
+ 
+</html>

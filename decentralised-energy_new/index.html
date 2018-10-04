@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Decentralized Energy App</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<link href="css/bootstrap.min.css" rel="stylesheet">
+		<link href="css/style.css" rel="stylesheet">	
+		<link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
+		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+		<script src="https://rawgit.com/gdi2290/angular-websocket/v1.0.9/angular-websocket.js"></script>
+		<script src="https://unpkg.com/@angular/router@0.2.0/angular1/angular_1_router.js"></script>
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+		
+	</head>
+
+	<body>
+			<div ng-app="myApp" ng-controller="myCtrl">
+	<div class="container-fluid">
+	
+		<!-- Header Section starts here-->
+		<header class="header_bg">
+			<div class="header_left"></div>
+			<div class="header_right"></div>
+			
+			<div class="container">
+				<div class="logo_pharma">
+					<a href="#"><img src="images/logo.png" alt="logo"/></a>
+				</div>
+				
+				<div class="banner_text_right">
+					Blockchain for Business<br><b>WITH IBM BLOCKCHAIN</b>
+				</div>
+			</div>
+
+		</header> 
+		<!-- Header Section ends here-->
+
+		<div class="wrapper">
+		
+			<!-- Menu Section starts here-->
+			<section class="menu_items_ph" >
+				<div class="container">
+					<ul>
+						<li ng-click="show_m()"><a class="item item01" href="#">Info</a></li>
+						<li ng-click="show_p()"><a class="item item02" href="#">Transactions</a></li>
+						<li class="menu_li"><a class="item item03" href="#">Participants</a>
+							<ul class="dropdown_items">
+								<li ng-click="show_d()"><a href="#">Resident</a></li>
+								<li ng-click="show_a()"><a href="#">Bank</a></li>
+								<li ng-click="show_u()"><a href="#">Utility Company</a></li>
+							</ul>
+						</li>							  
+						<li ng-click="show_i()"><a class="item item04" href="#">Assets</a></li>
+					</ul>
+				</div>
+			</section>
+			<!-- Menu Section ends here-->
+
+
+			<!-- Content Section starts here-->
+			<section class="content_area">
+				<div class="container"style="height: 700px">
+				
+					<div ng-show="show_ma" class="left_submenu col-md-3">
+						<h1>Info</h1>
+						<ul>
+							<li><a href="about.html" target="iframe_b">About</a></li>
+							<!-- <li><a href="blockChain.html" target="iframe_b">BlockChain</a></li> -->
+						</ul>
+					</div>
+						<div  ng-show="show_di" class="left_submenu col-md-3">
+						<h1>Residents</h1>
+						<ul>
+								<li><a href="viewResident.html"target="iframe_d">View Residents</a></li>
+								<li><a href="addResident.html"target="iframe_d">Add Resident</a></li>
+							    <li><a href="updateDeleteResident.html"target="iframe_d">Update/Delete Resident</a></li>
+						</ul>
+					</div>
+					<div  ng-show="show_aa" class="left_submenu col-md-3">
+							<h1>Banks</h1>
+							<ul>
+									<li><a href="viewBank.html"target="iframe_a">View Banks</a></li>
+									<li><a href="addbank.html"target="iframe_a">Add Bank</a></li>
+									<li><a href="updateDeleteBank.html"target="iframe_a">Update/Delete Bank</a></li>
+							</ul>
+						</div>
+						<div  ng-show="show_ua" class="left_submenu col-md-3">
+								<h1>Banks</h1>
+								<ul>
+										<li><a href="viewUtilityCompanies.html"target="iframe_u">View Utility Companies</a></li>
+										<li><a href="addUtilityCompany.html"target="iframe_u">Add Utility Comapany</a></li>
+										<li><a href="updateDeleteUtilityCompany.html"target="iframe_u">Update/Delete Utility Comapany</a></li>
+								</ul>
+							</div>
+					<div  ng-show="show_ph" class="left_submenu col-md-3">
+							<h1>Transactions</h1>
+							<ul>
+									<li><a href="transactionRR.html" target="iframe_p">Resident to Resident</a></li>
+									<li><a href="transactionRU.html"target="iframe_p">Resident to UtilityCompany</a></li>
+									<li><a href="transactionRB.html"target="iframe_p">Resident to Bank</a></li>
+									 
+						</div>
+						<div  ng-show="show_io" class="left_submenu col-md-3">
+								<h1>Assets</h1>
+								<ul>
+									<li><a href="coins.html"target="iframe_i">Coins</a></li>
+									<li><a href="cash.html"target="iframe_i">Cash</a></li>
+									<li><a href="energy.html"target="iframe_i">Energy</a></li>
+								</ul>
+							</div>
+							<!-- <div  ng-show="show_fda" class="left_submenu col-md-3">
+								<h1>IoT</h1>
+								<ul>
+									<li><a href="updateDrugStatus.html"target="iframe_f">Update Drug Status</a></li>
+								</ul>
+							</div> -->
+					
+					
+					<div class="right_content_block col-md-9"ng-show="show_ma">
+						
+							<iframe height="650px" width="100%" style="border: none;" src="About.html" name="iframe_b"></iframe>
+					
+					</div>
+					<div class="right_content_block col-md-9"ng-show="show_di">
+						
+							<iframe height="650px" width="100%" style="border: none" src="viewResident.html" name="iframe_d"></iframe>
+					
+					</div>
+					<div class="right_content_block col-md-9"ng-show="show_aa">
+						
+							<iframe  height="650px" width="100%" style="border: none" src="viewBank.html" name="iframe_a"></iframe>
+					
+					</div>
+					<div class="right_content_block col-md-9"ng-show="show_ua">
+						
+							<iframe  height="650px" width="100%" style="border: none" src="viewUtilityCompanies.html" name="iframe_u"></iframe>
+					
+					</div>
+					<div class="right_content_block col-md-9"ng-show="show_ph">
+						
+							<iframe  height="650px" width="100%" style="border: none" src="transactionRR.html" name="iframe_p"></iframe>
+					
+					</div>
+					<div class="right_content_block col-md-9" ng-show="show_io">
+						
+							<iframe  height="650px" width="100%" style="border: none" src="coins.html" name="iframe_i"></iframe>
+					
+					</div>
+				</div>
+			</section>
+			<!-- Content Section ends here-->
+			</div>
+		</div>
+
+		<!-- Footer Section starts here-->
+		<footer class="footer">©  copyright 2018</footer>
+		<!-- Footer Section ends here-->
+		
+	</div>
+	<script>
+var app = angular.module('myApp', []);
+ 
+ app.controller('myCtrl',['$scope','$http','$timeout',function ($scope,$http,$timeout) {
+	$scope.show_ma=true;
+	$scope.show_di=false;
+	$scope.show_ph=false;
+	$scope.show_io=false;
+	$scope.show_fda=false
+	$scope.show_aa=false;
+	$scope.show_ua=false;
+$scope.show_m=function(){
+	var ifr = document.getElementsByName('iframe_b')[0];
+    ifr.src = ifr.src;
+	$scope.show_ma=true;
+	$scope.show_di=false;
+	$scope.show_ph=false;
+	$scope.show_io=false;
+	$scope.show_fda=false
+	$scope.show_aa=false;
+	$scope.show_ua=false;
+}
+$scope.show_d=function(){
+	var ifr = document.getElementsByName('iframe_d')[0];
+    ifr.src = ifr.src;
+	$scope.show_ma=false;
+	$scope.show_di=true;
+	$scope.show_ph=false;
+	$scope.show_io=false;
+	$scope.show_fda=false
+	$scope.show_aa=false;
+	$scope.show_ua=false;
+}
+$scope.show_p=function(){
+	var ifr = document.getElementsByName('iframe_p')[0];
+    ifr.src = ifr.src;
+	$scope.show_ma=false;
+	$scope.show_di=false;
+	$scope.show_ph=true;
+	$scope.show_io=false;
+	$scope.show_fda=false
+	$scope.show_aa=false;
+	$scope.show_ua=false;
+}
+$scope.show_a=function(){
+	var ifr = document.getElementsByName('iframe_a')[0];
+    ifr.src = ifr.src;
+	$scope.show_ma=false;
+	$scope.show_di=false;
+	$scope.show_ph=false;
+	$scope.show_aa=true;
+	$scope.show_io=false;
+	$scope.show_fda=false;
+	$scope.show_ua=false;
+}
+$scope.show_u=function(){
+	var ifr = document.getElementsByName('iframe_u')[0];
+    ifr.src = ifr.src;
+	$scope.show_ma=false;
+	$scope.show_di=false;
+	$scope.show_ph=false;
+	$scope.show_aa=false;
+	$scope.show_ua=true;
+	$scope.show_io=false;
+	$scope.show_fda=false
+	
+}
+$scope.show_i=function(){
+	var ifr = document.getElementsByName('iframe_i')[0];
+    ifr.src = ifr.src;
+	$scope.show_ma=false;
+	$scope.show_di=false;
+	$scope.show_ph=false;
+	$scope.show_io=true;
+	$scope.show_fda=false
+	$scope.show_aa=false;
+	$scope.show_ua=false;
+}  
+$scope.show_f=function(){
+	var ifr = document.getElementsByName('iframe_f')[0];
+    ifr.src = ifr.src;
+	$scope.show_ma=false;
+	$scope.show_di=false;
+	$scope.show_ph=false;
+	$scope.show_io=false;
+	$scope.show_fda=true
+	$scope.show_aa=false;
+	$scope.show_ua=false;
+}
+ }]);
+	</script>
+	</body>
+</html>

@@ -1,0 +1,290 @@
+<html>
+<head>             
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+        <link href="css/bootstrap.min.css" rel="stylesheet">
+        <link href="css/style.css" rel="stylesheet">	
+        <link href="js/bootstrap.js" rel="stylesheet">	
+        <link href="js/bootstrap.min.js" rel="stylesheet">	
+        <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
+</head>
+
+<body  ng-init="loadResidents()" class="manufacturer_wrapper">
+<div ng-app="myApp" ng-controller="myCtrl" >
+    <div class="right_content_block col-md-9">
+					
+        <div class="alert alert-success" ng-show="sucess">
+                Resident details updated sucessfully
+                <p id="demo"></p>
+              </div>
+              <div class="alert alert-danger" ng-show="failuier">
+                Could not update resident details
+              </div>
+              <div class="alert alert-success" ng-show="sucess1">
+                    Resident deleted sucessfully
+                    <p id="demo"></p>
+                  </div>
+                  <div class="alert alert-danger" ng-show="failuier1">
+                    Resident does not exist
+                  </div>
+              <form>
+							
+                <h2><b> Enter Resident ID</b></h2>
+        <span class="fields_design col-md-6">
+            <label> Resident ID</label>
+            <input type="text" name="residentID" id="residentID"  ng-model="residentID" required>
+        </span>
+                                <div class="clearfix"></div>
+							<div class="submit_block">
+                                <input type="button" id="button" value="Update" class="submit_btn_cmn"ng-click="openUpdate()"/> 
+                                <!-- <input type="button"ng-attr-id="{{ 'myBtn-' + $index }}" ng-click="openUpdate($index)"value="Update" class="submit_btn_cmn" /> -->
+								<input type="button" value="Remove" class="submit_btn_cmn"ng-click="Remove()"/>
+                            </div>
+                           
+						</form>
+					</div>
+				
+    
+    <div id="myModal" class="modal" >
+        <!-- Modal content  -->
+         <div class="modal-content" >
+           <span class="close">&times;</span>    
+           <span class="fields_design col-md-6">
+               <label>Resident ID</label>
+                   <input type="text" name="residentIDup" id="residentIDup" placeholder="resident ID" ng-model="residentIDup" readonly>    
+            </span>         
+            <span class="fields_design col-md-6">
+                <label>First Name</label>
+                 <input type="text" name="firstNameDup" id="firstNameDup" placeholder="first Name" ng-model="firstNameDup">       
+            </span>         
+            <span class="fields_design col-md-6">
+                <label>Last Name</label>
+                 <input type="text" name="lastNameDup" id="lastNameDup" placeholder="last Name" ng-model="lastNameDup">
+             </span>
+             <div class="submit_block">
+                 <input type="button" id="button" ng-click="Update()" value="Submit" class="submit_btn_cmn"/>
+            </div>
+         </div>
+         </div>
+        </div>
+</body>
+<script>
+var app = angular.module('myApp', []);
+app.controller('myCtrl',['$scope','$http','$q','$timeout',function ($scope,$http,$q,$timeout) {
+    
+    $scope.failuier=false;
+    $scope.failuier1=false;
+    $scope.sucess=false;
+    $scope.sucess1=false;
+    $scope.coinValue=[];
+    $scope.cashValue=[];
+    $scope.energyValue=[];
+    $scope.coinID=[];
+    var mySubStringCoin=""
+  $scope.sucess=false
+  $scope.transactionId="";
+  $scope.index="";
+ $scope.residentID="";
+ $scope.residentIDup="";
+ $scope.firstNameDup="";
+ $scope.lastNameDup="";
+ $scope.firstName="";
+ $scope.lastName="";
+ $scope.coins="";
+ $scope.energy="";
+ $scope.energyUnits="";
+ $scope.cash="";
+ $scope.cashCurrency="";
+ $scope.Residents = []
+ $scope.ResidentsResponse=[]
+
+$scope.Remove = function () {
+     //Find the record using Index from Array.
+     var id = $scope.residentID;
+        // $scope.Residents.splice(index, 1);
+   // var del = "/" + (index + 1);
+     var requestInfo = Request();
+     data : requestInfo
+  var res = $http.delete('http://ec2-35-173-231-185.compute-1.amazonaws.com:3000/api/Resident/'+id).then((function(response) {
+console.log("success");
+}),(function(data,status,headers,config) {
+}));
+
+var res = $http.delete('http://ec2-35-173-231-185.compute-1.amazonaws.com:3000/api/Coins/'+"CO_"+id).then((function(response) {
+console.log("success deleting coins asset");
+}),(function(data,status,headers,config) {
+}));
+
+var res = $http.delete('http://ec2-35-173-231-185.compute-1.amazonaws.com:3000/api/Energy/'+"EN_"+id).then((function(response) {
+console.log("success deleting Energy asset");
+}),(function(data,status,headers,config) {
+}));
+var res = $http.delete('http://ec2-35-173-231-185.compute-1.amazonaws.com:3000/api/Cash/'+"CA_"+id).then((function(response) {
+console.log("success deleting Energy asset");
+$scope.sucess1=true;
+}),(function(data,status,headers,config) {
+    $scope.failuier1=true;
+}));
+ }
+$scope.openUpdate = function ()
+{
+    var id = $scope.residentID;
+
+        document.getElementById("residentIDup").value = document.getElementById("residentID").value;
+    var modal =""
+    var btn =""
+    var span=""
+  modal = document.getElementById('myModal');
+// Get the button that opens the modal
+btn = document.getElementById('button');
+// Get the <span> element that closes the modal
+span = document.getElementsByClassName("close")[0];
+// When the user clicks the button, open the modal 
+btn.onclick = function() {
+    modal.style.display = "block";
+    
+}
+$scope.message = "Product have been updated sucessfully";
+// When the user clicks on <span> (x), close the modal
+span.onclick = function() {
+    modal.style.display = "none";
+    
+     
+    $scope.residentIDup=""
+    $scope.firstNameDup=""
+    $scope.lastNameDup=""
+} 
+}
+
+ $scope.Update = function () {
+    var modal =""
+    var btn =""
+    var span=""
+  modal = document.getElementById('myModal');
+// Get the button that opens the modal
+btn = document.getElementById('button');
+     
+var requestUp={
+  "$class": "org.decentralized.energy.network.Resident",
+  //"residentID": $scope.residentIDup,
+  "firstName": $scope.firstNameDup,
+  "lastName": $scope.lastNameDup,
+  "coins": "resource:org.decentralized.energy.network.Coins#"+"CO_"+$scope.residentID,
+  "cash": "resource:org.decentralized.energy.network.Cash#"+"CA_"+$scope.residentID,
+  "energy": "resource:org.decentralized.energy.network.Energy#"+"EN_"+$scope.residentID
+} 
+     var requestInfo = Request();
+     data : requestInfo
+  var res = $http.put('http://ec2-35-173-231-185.compute-1.amazonaws.com:3000/api/Resident/'+$scope.residentID,requestUp).then(function successCallback(response){
+           $scope.update_response=response;
+           $scope.sucess=true
+           $scope.transactionId=$scope.update_response.data.transactionId
+       }, function errorCallback(response){
+           console.log("PUT-ing of data failed");
+           $scope.failuier=true;
+       });
+       modal.style.display = "none";
+    $scope.bankIDup=""
+    $scope.nameDup=""
+ }
+
+$scope.loadResidents = function() {
+    var id = $scope.residentID;
+var res = $http.get('http://ec2-35-173-231-185.compute-1.amazonaws.com:3000/api/Resident/',id).then((function(data,status,
+headers,config) {
+    console.log("sucess in loading residents")
+for(var i=0;i<data.data.length;i++){
+    
+$scope.Residents.push(data.data[i]);
+$scope.Residents[i].energyUnits = "Kwh";
+$scope.Residents[i].cashCurrency = "USD";
+}
+$scope.loadCoinValue();
+$scope.loadCashValue();
+$scope.loadEnergyValue();
+}),(function(data,status,headers,config) {
+}));
+};
+$scope.loadResidents();
+$scope.loadCoinValue = function()
+{
+    for(var j=0;j<$scope.Residents.length;j++){
+    var id = $scope.Residents[j].residentID;
+    var res = $http.get('http://ec2-35-173-231-185.compute-1.amazonaws.com:3000/api/Coins/CO_'+id).
+    then(function successCallback(response) {
+$scope.coinValue.push(response.data.value);
+$scope.coinID.push(response.data.coinsID);
+
+    $scope.insertCoins();
+},(function(data,status,headers,config) {
+}));
+}
+}
+$scope.insertCoins = function()
+{
+    for(var m=0;m<$scope.Residents.length;m++){
+         mySubStringCoin = $scope.Residents[m].coins.substring($scope.Residents[m].coins.lastIndexOf("#") + 1);
+        if($scope.coinID[m] == mySubStringCoin)  
+        {
+      
+        $scope.Residents[m].coins = $scope.coinValue[m];
+        }
+      }
+    
+}
+$scope.loadCashValue = function()
+{
+    for(var j=0;j<$scope.Residents.length;j++){
+    var id = $scope.Residents[j].residentID;
+    var res = $http.get('http://ec2-35-173-231-185.compute-1.amazonaws.com:3000/api/Cash/'+"CA_"+id).then((function(response) {
+$scope.cashValue.push(response.data.value);
+$scope.insertCash();
+}),(function(data,status,headers,config) {
+}));
+}
+}
+$scope.insertCash = function()
+{
+    for(var m=0;m<$scope.cashValue.length;m++)
+    {
+        $scope.Residents[m].cash = $scope.cashValue[m];
+    }
+}
+$scope.loadEnergyValue = function()
+{
+    for(var j=0;j<$scope.Residents.length;j++){
+    var id = $scope.Residents[j].residentID;
+    var res = $http.get('http://ec2-35-173-231-185.compute-1.amazonaws.com:3000/api/Energy/'+"EN_"+id).then((function(response) {
+$scope.energyValue.push(response.data.value);
+$scope.insertEnergy();
+}),(function(data,status,headers,config) {
+}));
+}
+}
+$scope.insertEnergy = function()
+{
+    for(var m=0;m<$scope.energyValue.length;m++)
+    {
+        $scope.Residents[m].energy = $scope.energyValue[m];
+    }
+}
+
+
+function Request() {
+ 
+  return {
+  "$class": "org.decentralized.energy.network.Resident",
+  "residentID": "",
+  "firstName": "",
+  "lastName": "",
+  "coins": "",
+  "cash": "",
+  "energy": ""
+  }
+  };
+}]);
+ 
+</script>
+ 
+</html>

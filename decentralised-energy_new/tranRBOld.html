@@ -1,0 +1,232 @@
+<html>
+<head>              
+<link rel="stylesheet"href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0-beta/css/materialize.min.css">
+<!-- Compiled and minified JavaScript -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0-beta/js/materialize.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+<script src="https://rawgit.com/gdi2290/angular-websocket/v1.0.9/angular-websocket.js"></script>
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script> 
+<!-- <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"> -->
+<style>
+  select{
+      display: inline;
+  }
+     body {font-family: Arial;}
+     div#envelope{
+     width: 70%;
+     margin: 10px 30% 10px 25%;
+     padding:10px 0;
+     border: 2px solid gray;
+     height: 120%;
+     }
+   
+   </style>
+</head>
+
+<body ng-init="loadResidents()">
+<div ng-app="myApp" ng-controller="myCtrl" >
+
+    <div class="right_content_block col-md-9">
+        <h2>Resident to Bank</h2>
+        <h3>Enter Transaction Info</h3>
+        <form>
+                <p>Rate: <b>10 Coins / USD </b></p>
+
+                <span class="fields_design col-md-6">
+                        <p>Action
+                    <select name="Action" ng-model="Action" >
+                            <option value = ""></option>
+                            <option value="buyEnergy">Get Cash (USD) for coins</option>
+                            <option value="sellEnergy">Get coins for cash(USD)</option>
+                    </select></p>
+                    </span>
+            
+            <span class="fields_design col-md-6">
+                <p>Resident
+            <select name="residents" value={{x.residentID}} ng-options="x for x in names"  ng-model="Resident"></select></p>
+            </span>
+            
+            <span class="fields_design col-md-6">
+                <p>Utility Company
+                <!-- <select name="residents" value={{consumerResident.residentID}}></select></p> -->
+                <select name="Utility Company" value={{x.utilityID}} ng-options="x for x in Utility"  ng-model="utility"></select></p>
+            </span>
+
+            <p>Energy value (kwh): <input Name="energyValue" type="number" step='any'ng-model="energyValue" value={{energyValue}}>
+            </p>
+            <div class="submit_block">
+                    <input type="button" ng-click="transaction()" value="Excecute Transaction" />
+                </div>
+        </form>
+    </div>
+
+        </div> 
+
+</body>
+<script>
+var app = angular.module('myApp', []);
+app.controller('myCtrl',['$scope','$http','$timeout',function ($scope,$http,$timeout) {
+  
+  $scope.sucess=false
+  $scope.transactionId="";
+  $scope.index=""
+ $scope.residentID="";
+ $scope.firstName="";
+ $scope.lastName="";
+ $scope.coins="";
+ $scope.energy="";
+ $scope.energyUnits="";
+ $scope.cash="";
+ $scope.cashCurrency="";
+ $scope.Residents = []
+ $scope.energyValue=""
+ $scope.names = []
+ $scope.producer=[]
+ $scope.utility=[]
+ $scope.Utility = []
+ $scope.consumer = []
+ $scope.Action= []
+ $scope.transaction = function()
+ {
+    $scope.excecuteTransaction();
+ }
+ 
+console.log($scope.Action.value)
+
+
+$scope.loadResidents = function() {
+  var requestDisplay={
+  "$class": "org.decentralized.energy.network.Resident",
+  "residentID": $scope.residentID,
+  "firstName": $scope.firstName,
+  "lastName": $scope.lastName,
+  "coins": "resource:org.decentralized.energy.network.Coins#"+"CO_"+$scope.residentID,
+  "cash": "resource:org.decentralized.energy.network.Cash#"+"CA_"+$scope.residentID,
+  "energy": "resource:org.decentralized.energy.network.Energy#"+"EN_"+$scope.residentID
+} 
+    var requestInfo = Request();
+     data : requestInfo
+  var res = $http.get('http://ec2-35-173-231-185.compute-1.amazonaws.com:3000/api/Resident/',requestDisplay).then((function(data,status,
+headers,config) {
+console.log("success");
+for(var i=0;i<data.data.length;i++){
+    $scope.names.push(data.data[i].residentID);
+    $scope.Residents.push(data.data[i]);
+    console.log($scope.names)
+}
+}),(function(data,status,headers,config) {
+   
+alert( "cannot display data");
+}));
+};
+$scope.loadResidents();
+
+$scope.loadUtilityCompanies = function() {
+  var requestDisplay={
+     "$class": "org.decentralized.energy.network.UtilityCompany",
+    "utilityID": $scope.utilityID,
+    "name": $scope.name,
+    "coins": "resource:org.decentralized.energy.network.Coins#"+"CO_"+$scope.residentID,
+    "energy": "resource:org.decentralized.energy.network.Energy#"+"EN_"+$scope.residentID
+} 
+    var requestInfo = Request();
+     data : requestInfo
+  var res = $http.get('http://ec2-35-173-231-185.compute-1.amazonaws.com:3000/api/UtilityCompany/',requestDisplay).then((function(data,status,
+headers,config) {
+console.log("success");
+for(var i=0;i<data.data.length;i++){
+
+$scope.Utility.push(data.data[i].utilityID);
+    $scope.utility.push(data.data[i]);
+    console.log($scope.Utility)
+
+
+}
+}),(function(data,status,headers,config) {
+   
+alert( "cannot display data");
+}));
+
+};
+$scope.loadUtilityCompanies();
+
+$scope.excecuteTransaction = function() { 
+    var request={
+       "$class": "org.decentralized.energy.network.EnergyToCoins",
+      "energyRate": "1",
+      "energyValue": $scope.energyValue,
+      "coinsInc": "resource:org.decentralized.energy.network.Coins#"+"CO_"+$scope.producer[0].utilityID,
+     "coinsDec": "resource:org.decentralized.energy.network.Coins#"+"CO_"+$scope.consumer[0].utilityID,
+    "energyInc": "resource:org.decentralized.energy.network.Energy#"+"EN_"+$scope.consumer[0].utilityID,
+     "energyDec": "resource:org.decentralized.energy.network.Energy#"+"EN_"+$scope.producer[0].utilityID 
+} 
+     var requestInfo = Request1();
+   
+     data : requestInfo
+ 
+  var res = $http.post('http://ec2-35-173-231-185.compute-1.amazonaws.com:3000/api/EnergyToCoins',request).then(function successCallback(response){
+           alert("Successfully added new batch");
+           $scope.update_response=response;
+           $scope.sucess=true
+           $scope.transactionId=$scope.update_response.data.transactionId
+           for(var i=0;i<$scope.Residents.length;i++)
+        {
+            if($scope.Residents[i].residentID == $scope.producerResident)
+            {
+                $scope.Residents[i].coins = $scope.update_response.data.coinsInc
+                $scope.Residents[i].energy = $scope.update_response.data.energyDec
+                
+            }
+            
+        }
+        console.log($scope.Residents)
+        for(var i=0;i<$scope.Residents.length;i++)
+        {
+            if($scope.Residents[i].residentID == $scope.consumerResident)
+            {
+                $scope.Residents[i].coins = $scope.update_response.data.coinsDec
+                $scope.Residents[i].energy = $scope.update_response.data.energyInc
+            }
+            
+        }
+        console.log($scope.Residents)
+// for(var i=0;i<response.length;i++){
+//            $scope.producerResident.coins.push(data.data.coinsInc.value)
+//     $scope.producerResident.energy.push(data.data.energyDec.value)
+//     $scope.consumerResident.coins.push(data.data.coinsDec.value)
+//     $scope.consumerResident.energy.push(data.data.energyInc.value)
+// }
+       }, function errorCallback(response){
+           console.log("POST-ing of data failed");
+       });
+     
+}
+function Request() {
+ 
+  return {
+  "$class": "org.decentralized.energy.network.Resident",
+  "residentID": "",
+  "firstName": "",
+  "lastName": "",
+  "coins": "",
+  "cash": "",
+  "energy": ""
+  }
+  };
+  function Request1() {
+ 
+ return {
+    "$class": "org.decentralized.energy.network.EnergyToCoins",
+      "energyRate": "1",
+      "energyValue": "",
+      "coinsInc": "",
+      "coinsDec": "",
+      "energyInc": "",
+      "energyDec": "", 
+ }
+ };
+}]);
+ 
+</script>
+ 
+</html>

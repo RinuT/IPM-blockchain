@@ -1,0 +1,327 @@
+<html>
+<head>              
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+        <link href="css/bootstrap.min.css" rel="stylesheet">
+        <link href="css/style.css" rel="stylesheet">	
+        <link href="js/bootstrap.js" rel="stylesheet">	
+        <link href="js/bootstrap.min.js" rel="stylesheet">	
+        <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
+
+</head>
+<body class="manufacturer_wrapper">
+        <div ng-app="myApp" ng-controller="myCtrl" >
+            <div class="right_content_block col-md-9">
+                            
+                <div class="alert alert-success" ng-show="sucess">
+                        Updated bank details sucessfully
+                        <p id="demo"></p>
+                      </div>
+                      <div class="alert alert-danger" ng-show="failuier">
+                        Could not updated bank details
+                      </div>
+                      <div class="alert alert-success" ng-show="sucess1">
+                            Deleted Bank sucessfully
+                            <p id="demo"></p>
+                          </div>
+                          <div class="alert alert-danger" ng-show="failuier1">
+                            Could not delete bank. bank does not exist
+                          </div>
+                      <form>
+                                    
+                        <h2><b> Enter Bank ID</b></h2>
+                <span class="fields_design col-md-6">
+                    <label> Bank ID</label>
+                    <input type="text" name="bankID" id="bankID"  ng-model="bankID" required>
+                </span>
+                                        <div class="clearfix"></div>
+                                    <div class="submit_block">
+                                        <input type="button" id="button" value="Update" class="submit_btn_cmn"ng-click="openUpdate()"/> 
+                                        <!-- <input type="button"ng-attr-id="{{ 'myBtn-' + $index }}" ng-click="openUpdate($index)"value="Update" class="submit_btn_cmn" /> -->
+                                        <input type="button" value="Remove" class="submit_btn_cmn"ng-click="Remove()"/>
+                                    </div>
+                                   
+                                </form>
+                            </div>
+                        
+            
+            <div id="myModal" class="modal" >
+                <!-- Modal content  -->
+                 <div class="modal-content" >
+                   <span class="close">&times;</span>  
+                   <span class="fields_design col-md-6">
+                        <label> Bank ID</label>
+                        <input type="text" name="bankIDup" id="bankIDup"  ng-model="bankIDup" readonly>
+                    </span> 
+                    <span class="fields_design col-md-6">
+                            <label> Bank Name</label>
+                            <input type="text" name="nameDup" id="nameDup"  ng-model="nameDup" >
+                    </span>  
+                       <!-- <div class="form-group text-left">
+                           <input type="text" name="bankIDup" id="bankIDup" placeholder="bank ID" ng-model="bankIDup" readonly>    
+                       </div>           -->
+                       <!-- <div class="form-group text-left">
+                         <input type="text" name="nameDup" id="nameDup" placeholder="Bank Name" ng-model="nameDup">       
+                       </div> -->
+                       <div class="submit_block">
+                         <input type="button" id="button" ng-click="Update()" value="Submit" class="submit_btn_cmn"/>
+                        </div>
+                 </div>
+                 </div>
+                
+                </div>
+        </body>
+
+
+<script>
+var app = angular.module('myApp', []);
+app.controller('myCtrl',['$scope','$http','$timeout','$q',function ($scope,$http,$timeout,$q) {
+  
+  $scope.sucess=false;
+  $scope.failuier=false;
+  $scope.failuier1=false;
+  $scope.sucess1=false;
+  $scope.transactionId="";
+  $scope.index=""
+  $scope.bankID="";
+ $scope.bankIDup="";
+ $scope.nameDup="";
+ $scope.name="";
+ $scope.cash="";
+ $scope.coins="";
+ $scope.cashCurrency="";
+ $scope.Banks = []
+ $scope.BanksResponse=[]
+ $scope.coinValue = [];
+ $scope.coinID=[];
+ $scope.cashValue = [];
+ $scope.cashID = [];
+ var mySubStringCoin="";
+ var mySubStringCash="";
+  
+  $scope.Add = function(){
+ var bankinner = {}
+ bankinner.bankID = $scope.bankID
+ bankinner.name = $scope.name
+ bankinner.cash = $scope.cash
+ bankinner.coins = $scope.coins
+ bankinner.cashCurrency =$scope.cashCurrency
+ $scope.Banks.push(bankinner)
+ $scope.message = "Product have been created sucessfully";
+ $scope.setValue();
+
+ $scope.bankIDup= $scope.bankID
+ $scope.nameDup= $scope.name
+ $scope.cashDup= $scope.cash
+ $scope.coinsDup=$scope.coins
+ $scope.cashCurrencyDup=$scope.cashCurrency
+ $scope.bankID="";
+ $scope.name="";
+ $scope.cash="";
+ $scope.coins="";
+ $scope.cashCurrency="";
+}
+
+
+ $scope.Remove = function (index) {
+     //Find the record using Index from Array.
+     var id = $scope.bankID;
+       //  $scope.Banks.splice(index, 1);
+    //var del = "/" + (index + 1);
+     var requestInfo = Request();
+     data : requestInfo
+  var res = $http.delete('http://ec2-35-173-231-185.compute-1.amazonaws.com:3000/api/Bank/'+id).then((function(response) {
+console.log("success");
+
+}),(function(data,status,headers,config) {
+}));
+var res = $http.delete('http://ec2-35-173-231-185.compute-1.amazonaws.com:3000/api/Coins/'+"CO_"+id).then((function(response) {
+console.log("success deleting coins asset");
+}),(function(data,status,headers,config) {
+}));
+
+var res = $http.delete('http://ec2-35-173-231-185.compute-1.amazonaws.com:3000/api/Cash/'+"CA_"+id).then((function(response) {
+console.log("success deleting Energy asset");
+$scope.sucess1=true;
+}),(function(data,status,headers,config) {
+$scope.failuier1=true;
+}));
+
+ }
+$scope.openUpdate = function ()
+{
+   
+    var id = $scope.residentID;
+
+        document.getElementById("bankIDup").value = document.getElementById("bankID").value;
+    var modal =""
+    var btn =""
+    var span=""
+  modal = document.getElementById('myModal');
+// Get the button that opens the modal
+btn = document.getElementById('button');
+// Get the <span> element that closes the modal
+span = document.getElementsByClassName("close")[0];
+// When the user clicks the button, open the modal 
+btn.onclick = function() {
+    modal.style.display = "block";
+    
+}
+
+$scope.message = "Product have been updated sucessfully";
+// When the user clicks on <span> (x), close the modal
+span.onclick = function() {
+    modal.style.display = "none";
+     
+    $scope.bankIDup=""
+    $scope.nameDup=""
+} 
+}
+
+
+// $scope.loadBanks = function() {
+//   var requestDisplay={
+//   "$class": "org.decentralized.energy.network.Bank",
+//   "bankID": $scope.bankID,
+//   "name": $scope.name,
+//   "coins": "resource:org.decentralized.energy.network.Coins#CO_"+$scope.bankID,
+//   "cash": "resource:org.decentralized.energy.network.Cash#CA_"+$scope.bankID,
+// } 
+//     var requestInfo = Request();
+//      data : requestInfo
+//   var res = $http.get('http://ec2-35-173-231-185.compute-1.amazonaws.com:3000/api/Bank/',requestDisplay).then((function(data,status,
+// headers,config) {
+// console.log("success in loading banks");
+// for(var i=0;i<data.data.length;i++){   
+// $scope.Banks.push(data.data[i]);
+// $scope.Banks[i].cashCurrency = "USD";
+// }
+// $scope.loadCoinValue();
+// $scope.loadCashValue();
+// }),(function(data,status,headers,config) {  
+// }));
+// };
+// $scope.loadBanks();
+
+// $scope.loadCoinValue = function()
+// {
+//     var result = $q.defer();
+//     //setTimeout(result.resolve,$scope.Residents*100000);
+//     for(var j=0;j<$scope.Banks.length;j++){       
+//     var id = $scope.Banks[j].bankID;
+     
+//     var res = $http.get('http://ec2-35-173-231-185.compute-1.amazonaws.com:3000/api/Coins/CO_'+id).then(function successCallback(response) {
+//         result.resolve(response)
+// $scope.coinValue.push(response.data.value);
+// $scope.coinID.push(response.data.coinsID);
+
+// if($scope.Banks.length == $scope.coinValue.length)
+// {
+//     $scope.insertCoins();
+// }
+// return result.promise;
+// },(function(data,status,headers,config) {
+// }));
+// }
+// }
+// $scope.insertCoins = function()
+// {
+//     for(var m=0;m<$scope.Banks.length;m++){
+//          mySubStringCoin = $scope.Banks[m].coins.substring($scope.Banks[m].coins.lastIndexOf("#") + 1);
+//         if($scope.coinID[m] == mySubStringCoin)  
+//         {
+      
+//         $scope.Banks[m].coins = $scope.coinValue[m];
+//         }
+//       }
+    
+// }
+
+// $scope.loadCashValue = function()
+// {
+//     var result = $q.defer();
+//     setTimeout(result.resolve,$scope.Banks*100000);
+//     for(var j=0;j<$scope.Banks.length;j++){       
+//     var id = $scope.Banks[j].bankID;
+     
+//     var res = $http.get('http://ec2-35-173-231-185.compute-1.amazonaws.com:3000/api/Cash/CA_'+id).then(function successCallback(response) {
+//         result.resolve(response)
+// $scope.cashValue.push(response.data.value);
+// $scope.cashID.push(response.data.cashID);
+
+// if($scope.Banks.length == $scope.cashValue.length)
+// {
+//     $scope.insertCash();
+// }
+// return result.promise;
+// },(function(data,status,headers,config) {
+// }));
+// }
+// }
+// $scope.insertCash = function()
+// {
+//     for(var m=0;m<$scope.Banks.length;m++){
+//          mySubStringCash = $scope.Banks[m].cash.substring($scope.Banks[m].cash.lastIndexOf("#") + 1);
+//         if($scope.cashID[m] == mySubStringCash)  
+//         {
+      
+//         $scope.Banks[m].cash = $scope.cashValue[m];
+//         }
+//       }
+    
+// }
+
+
+ $scope.Update = function () {
+    var modal =""
+    var btn =""
+    var span=""
+  modal = document.getElementById('myModal');
+// Get the button that opens the modal
+btn = document.getElementById('button');
+
+     
+var requestUp={
+
+   "$class": "org.decentralized.energy.network.Bank",
+  "bankID": $scope.bankIDup,
+  "name": $scope.nameDup,
+  "coins": "resource:org.decentralized.energy.network.Coins#CO_"+$scope.bankID,
+  "cash": "resource:org.decentralized.energy.network.Cash#CA_"+$scope.bankID
+} 
+     var requestInfo = Request();
+     data : requestInfo
+  var res = $http.put('http://ec2-35-173-231-185.compute-1.amazonaws.com:3000/api/Bank/'+$scope.bankID,requestUp).then(function successCallback(response){
+           $scope.update_response=response;
+           $scope.sucess=true;
+           $scope.transactionId=$scope.update_response.data.transactionId
+       }, function errorCallback(response){
+           console.log("PUT-ing of data failed");
+           $scope.failuier=true;
+       });
+       
+    modal.style.display = "none";
+    $scope.bankIDup=""
+    $scope.nameDup=""
+
+ }
+
+
+function Request() {
+ 
+  return {
+ 
+
+  "$class": "org.decentralized.energy.network.Bank",
+  "bankID": "",
+  "name": "",
+  "coins": "",
+  "cash": "",
+  }
+  };
+}]);
+ 
+</script>
+ 
+</html>
