@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Track and Trace</title>
+		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+        <script src="https://rawgit.com/gdi2290/angular-websocket/v1.0.9/angular-websocket.js"></script>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<link href="css/bootstrap.min.css" rel="stylesheet">
+		<link href="css/style.css" rel="stylesheet">	
+        <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
+	</head>
+
+	<body>
+	
+	<div class="container-fluid">
+	
+		<!-- Header Section starts here-->
+		<header class="header_bg">
+			<div class="header_left"></div>
+			<div class="header_right"></div>
+			
+			<div class="container">
+				<div class="logo_pharma">
+					<a href="#"><img src="images/logo.png" alt="logo"/></a>
+				</div>
+				
+				<div class="banner_text_right">
+					Blockchain for Business<br><b>WITH IBM BLOCKCHAIN</b>
+				</div>
+			</div>
+
+		</header> 
+		<!-- Header Section ends here-->
+		
+		<div class="wrapper">
+
+		<!-- Banner Section starts here-->
+		<div class="banner_track">
+			<div class="container">TRACK & TRACE</div>
+		</div>
+		<!-- Banner Section ends here-->
+		<div ng-app="myApp" ng-controller="myCtrl">
+		<!-- Content Section starts here-->
+		<div class="content_track">
+			<div class="container zero_padding">
+				<div class="col-md-3 zero_padding">
+					<div class="left_menu_items">
+						<ul class="left_menu_track">
+							<li class="item_track01" ><a href="index.html">Home</a></li>
+							<li class="item_track02" ><a href="manufacturer.html">Manufacturer</a></li>
+							<li class="item_track03" ><a href="distributor.html">Distributor</a></li>
+							<li class="item_track04 active_track_left_menu" ><a href="dealer.html">Dealer</a></li>
+							<li class="item_track05" ><a href="hospital.html">Hospital</a></li>
+							<li class="item_track06"><a href="dashboard_page2.html">Dashboard</a></li>
+						</ul>
+					</div>
+				</div>
+				<div class="col-md-9 zero_padding">
+					<div class="right_content_track">
+						<h4>Dealer</h4>
+						<div class="dealer_content">
+								<div style="text-align: center" class="alert alert-danger" ng-show="failure">
+										No product with specified UUID
+									</div>
+							<h5>Search Product details. . .</h5>
+							<form>
+								<label>Product ID</label>
+								<input type="text" value="Enter Product ID Here"  ng-model="uuid">
+								<input type="button" value="Search"ng-click="search()">
+								<span class="fields_design col-md-6" ng-show="show">
+										<div class="component">
+												<div   >
+														<div class="col s12" >
+														<div style= "padding: 10%;""text-align: center;">
+														<table BORDER=1 BORDERCOLOR="#8fb2b9"style="height:100px; width: 100%">
+														<thead style="background-color:blue;"><tr>
+														<th ><label>UUID </label></th>
+														<th><label> MAKE </label></th>
+														<th ><label> MATERIAL </label></th>
+														<th><label> PRODUCT STATUS</label></th>
+														<th><label> SHIPMENT STATUS</label></th>
+														<th><label> BAR CODE</label></th>
+														</tr>
+														</thead>
+														<tbody style="background-color:#b3c8cb;">
+														<tr>
+																	<td>{{uuid_search}}</td>
+																	<td>{{make}}</td>
+																	<td>{{material}}</td>
+																	<td>{{productStatus}}</td>
+																	<td>{{shipmentStatus}}</td>
+																	<td>{{barcode}}</td>
+														</tr>
+														</tbody>
+														</table>
+														</div>
+														</div>
+														</div>
+													</span>
+								
+							</form>
+						</div>
+
+					</div>
+			  </div>
+			</div>
+		</div>
+		<!-- Content Section ends here-->
+		</div>
+		</div>
+		<!-- Footer Section starts here-->
+		<footer class="footer">©  copyright 2018</footer>
+		<!-- Footer Section ends here-->
+		
+	</div>
+	<script>
+ 
+			var app =angular.module('myApp', []);
+			 
+			app.controller('myCtrl',['$scope','$http','$timeout',function ($scope,$http,$timeout) {
+			 
+			$scope.uuid_search=""
+			 
+			$scope.barcode=" "
+			 
+			$scope.material=" "
+			 
+			$scope.make=" "
+			 
+			$scope.productStatus=" "
+			 
+			$scope.show=false
+
+			 $scope.failure=false;
+			 
+			function Request_search() {
+			 
+			return {
+			 
+			"Request" : {
+			 
+			"$class":"com.cts.ipm.track.CreateProduct",
+			 
+			"uuid":""
+			 
+			}
+			 
+			}
+			 
+			};
+			 
+			function init(){
+			 
+			var websocket =new WebSocket("ws://track-and-trace-network.mybluemix.net");
+			 
+			websocket.addEventListener('open',evt =>doSocketOpen(evt));
+			 
+			websocket.addEventListener('close',evt =>doSocketClose(evt));
+			 
+			websocket.addEventListener('message',evt =>doSocketMessage(evt));
+			 
+			 
+			}
+			 
+			 
+			 
+			function doSocketClose(evt) {
+			 
+			console.log('Close.');
+			 
+			}
+			 
+			// Transaction has taken place
+			 
+			// Update table and chart
+			 
+			function doSocketMessage(evt) {
+			 
+			let data =JSON.parse(evt.data);
+			 
+			$scope.show=true;
+			 
+			$scope.uuid_search=data.uuid
+			 
+			$scope.shipmentStatus=data.product.shipmentStatus
+			 
+			$scope.material=data.product.material
+			 
+			$scope.make=data.product.make
+			$scope.barcode=data.product.batchCode
+			$scope.productStatus=data.product.productStatus
+			 
+			}
+			 
+			// FYI
+			 
+			function doSocketOpen(evt) {
+			 
+			console.log('Open.');
+			 
+			}
+			 
+			$scope.search=function(){
+			 
+			init();
+			 
+			var uuid =$scope.uuid;
+			 
+			var search_payload={"$class":"com.cts.ipm.track.searchProduct","uuid":uuid};
+			 
+			var requestInfo =Request_search();
+			 
+			 
+			 
+			$http.post("https://track-and-trace-network.mybluemix.net/api/searchProduct",search_payload).then((function(data,status,
+			headers,config) {
+			 
+			 
+			console.log("success");
+			 
+			 
+			 
+			}),(function(data,status,
+			headers,config) {
+			 
+				$scope.failure=true;
+			 
+			}));
+			 
+			}
+			 
+			 
+			}]);
+			 
+			 
+			</script>
+	</body>
+
+</html>

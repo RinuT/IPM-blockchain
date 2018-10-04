@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Track and Trace</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<link href="css/bootstrap.min.css" rel="stylesheet">
+		<link href="css/style.css" rel="stylesheet">
+		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>	
+        <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
+	</head>
+
+	<body>
+	<div ng-app="myApp" ng-controller="myCtrl"></div>
+	<div class="container-fluid">
+	
+		<!-- Header Section starts here-->
+		<header class="header_bg">
+			<div class="header_left"></div>
+			<div class="header_right"></div>
+			
+			<div class="container">
+				<div class="logo_pharma">
+					<a href="#"><img src="images/logo.png" alt="logo"/></a>
+				</div>
+				
+				<div class="banner_text_right">
+					Blockchain for Business<br><b>WITH IBM BLOCKCHAIN</b>
+				</div>
+			</div>
+
+		</header> 
+		<!-- Header Section ends here-->
+		
+		<div class="wrapper">
+
+		<!-- Banner Section starts here-->
+		<div class="banner_track">
+			<div class="container">TRACK & TRACE</div>
+		</div>
+		<!-- Banner Section ends here-->
+		
+		<!-- Content Section starts here-->
+		<div class="content_track">
+			<div class="container zero_padding">
+				<div class="col-md-3 zero_padding">
+					<div class="left_menu_items">
+						<ul class="left_menu_track">
+							<li class="item_track01 active_track_left_menu" ><a href="#">Home</a></li>
+							<li class="item_track02" ><a href="manufacturer.html">Manufacturer</a></li>
+							<li class="item_track03" ><a href="distributor.html">Distributor</a></li>
+							<li class="item_track04" ><a href="dealer.html">Dealer</a></li>
+							<li class="item_track05" ><a href="hospital.html">Hospital</a></li>
+							<li class="item_track06"><a href="dashboard_page2.html">Dashboard</a></li>
+						</ul>
+					</div>
+				</div>
+				
+				<div class="col-md-9 zero_padding">
+						<div class="right_content_track_blank"><img src="images/banner_content.png" alt="BannerContent"/></div>
+				  </div>
+
+			</div>
+		</div>
+		<!-- Content Section ends here-->
+		
+		</div>
+		<!-- Footer Section starts here-->
+		<footer class="footer">©  copyright 2018</footer>
+		<!-- Footer Section ends here-->
+		</div>
+	</div>
+	
+	<script>
+		var app = angular.module('myApp', []);
+		 
+		 app.controller('myCtrl',['$scope','$http','$timeout',function ($scope,$http,$timeout) {
+			$scope.show_h=false;
+			$scope.show_m=false;
+			$scope.show_d=false;
+			$scope.show_de=false;
+			$scope.show_ho=false;
+			$scope.show_da=false
+
+		$scope.show_h=function(){
+			$scope.show_h=true;
+			$scope.show_m=false;
+			$scope.show_d=false;
+			$scope.show_de=false;
+			$scope.show_ho=false;
+			$scope.show_da=false
+		}
+		$scope.show_m=function(){
+			$scope.show_h=false;
+			$scope.show_m=true;
+			$scope.show_d=false;
+			$scope.show_de=false;
+			$scope.show_ho=false;
+			$scope.show_da=false
+		}
+		$scope.show_d=function(){	
+			$scope.show_h=false;
+			$scope.show_m=false;
+			$scope.show_d=true;
+			$scope.show_de=false;
+			$scope.show_ho=false;
+			$scope.show_da=false
+		}
+		$scope.show_de=function(){
+			$scope.show_h=false;
+			$scope.show_m=false;
+			$scope.show_d=false;
+			$scope.show_de=true;
+			$scope.show_ho=false;
+			$scope.show_da=false
+		}
+		$scope.show_da=function(){
+			$scope.show_h=false;
+			$scope.show_m=false;
+			$scope.show_d=false;
+			$scope.show_de=false;
+			$scope.show_ho=false;
+			$scope.show_da=true
+				}  
+		$scope.show_ho=function(){
+			$scope.show_h=false;
+			$scope.show_m=false;
+			$scope.show_d=false;
+			$scope.show_de=false;
+			$scope.show_ho=true;
+			$scope.show_da=false
+			}
+		 }]);
+			</script>
+	</body>
+
+</html>

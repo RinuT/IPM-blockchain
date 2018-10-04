@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Track and Trace</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<link href="css/bootstrap.min.css" rel="stylesheet">
+		<link href="css/style.css" rel="stylesheet">	
+        <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
+	</head>
+
+	<body>
+	
+	<div class="container-fluid">
+	
+		<!-- Header Section starts here-->
+		<header class="header_bg">
+			<div class="header_left"></div>
+			<div class="header_right"></div>
+			
+			<div class="container">
+				<div class="logo_pharma">
+					<a href="#"><img src="images/logo.png" alt="logo"/></a>
+				</div>
+				
+				<div class="banner_text_right">
+					Blockchain for Business<br><b>WITH IBM BLOCKCHAIN</b>
+				</div>
+			</div>
+
+		</header> 
+		<!-- Header Section ends here-->
+		
+		<div class="wrapper">
+
+		<!-- Banner Section starts here-->
+		<div class="banner_track">
+			<div class="container">TRACK & TRACE</div>
+		</div>
+		<!-- Banner Section ends here-->
+		
+		<!-- Content Section starts here-->
+		<div class="content_track">
+			<div class="container zero_padding">
+				<div class="col-md-3 zero_padding">
+					<div class="left_menu_items">
+						<ul class="left_menu_track">
+								<li class="item_track01" ><a href="index.html">Home</a></li>
+								<li class="item_track02" ><a href="manufacturer.html">Manufacturer</a></li>
+								<li class="item_track03" ><a href="distributor.html">Distributor</a></li>
+								<li class="item_track04" ><a href="dealer.html">Dealer</a></li>
+								<li class="item_track05" ><a href="hospital.html">Hospital</a></li>
+								<li class="item_track06 active_track_left_menu"><a href="dashboard_page1.html">Dashboard</a></li>
+						</ul>
+					</div>
+				</div>
+				<div class="col-md-9 zero_padding">
+					<div class="right_content_track">
+						<h4>Dashboard</h4>
+						
+						<div class="dashboard_block">
+							<div class="search_dashboard_block">
+								<form>
+									<label>UUID</label>
+									<input type="text" value="592545">
+									<input type="button" value="Search">
+								</form>
+							</div>
+						</div>
+						
+					</div>
+			  </div>
+			</div>
+		</div>
+		<!-- Content Section ends here-->
+		
+		</div>
+		<!-- Footer Section starts here-->
+		<footer class="footer">©  copyright 2018</footer>
+		<!-- Footer Section ends here-->
+		
+	</div>
+	<script>
+
+            var app =
+            angular.module('myApp', []);
+            
+            
+            app.controller('myCtrl',['$scope', '$http','$timeout', function ($scope, $http,$timeout) {
+            
+            $scope.uuid=""
+            
+            $scope.names = ["High","Normal"];
+            
+            $scope.url_shipment="https://track-and-trace-network.mybluemix.net/api/updateShipmentStatus";
+            
+            $scope.url_product="https://track-and-trace-network.mybluemix.net/api/updateProductStatus"
+            
+            $scope.class_shipment="com.cts.ipm.track.UpdateShipmentStatus"
+            
+            $scope.class_product="com.cts.ipm.track.UpdateProductStatus"
+            
+            
+            
+            $scope.updateUuid=function () {
+            
+            console.log("inside");
+            
+            $scope.uuid=document.getElementById('factory').value;
+            
+            console.log($scope.uuid);
+            
+            document.getElementById("factory").readOnly = true;
+            $scope.init();
+            
+            }
+            
+            $scope.ProductStatus=function(value){
+            
+            if(value=="TAMPERED"){
+            
+            api_call_product("TAMPERED",$scope.url_product,$scope.class_product)
+            
+            }
+            
+            else{
+            
+            api_call_product("IN_GOOD_CONDITION",$scope.url_product,$scope.class_product)
+            
+            }
+            
+            }
+            
+            $scope.init=function (){
+            $scope.tempertature_d=" ";
+            $scope.tempertature_m=" ";
+            $scope.tempertature_h=" ";
+            $scope.tempertature_w=" ";
+            console.log("my method");
+            
+            }
+           
+            
+            $scope.clickhere_M=  function (){
+              
+            api_call("IN_PRODUCTION",$scope.url_shipment,$scope.class_shipment)
+            }
+            
+            $scope.clickhere_D= function (){
+                
+            api_call("WITH_DISTRIBUTOR",$scope.url_shipment,$scope.class_shipment)
+            
+            }
+            
+            $scope.clickhere_W=  function (){
+             
+                    api_call("WITH_WHOLESALER",$scope.url_shipment,$scope.class_shipment)
+                
+            }
+            
+            $scope.clickhere_H= function (){
+              
+                    api_call("WITH_HOSPITAL",$scope.url_shipment,$scope.class_shipment)
+                
+               
+            }
+            
+            
+            
+            function   api_call(status,url,class_value){
+            
+            var search_payload={"$class":class_value,"uuid":$scope.uuid,"status":status};
+        
+            $http.post(url,search_payload).then((function(data,status,headers,config)
+             {
+            alert( "SUCESSFULLY UPDATED SHIPMENT STATUS");
+            if($scope.tempertature_m!= undefined && $scope.tempertature_m!= " "){
+                $scope.ProductStatus($scope.tempertature_m)
+            }
+            if($scope.tempertature_d!= undefined && $scope.tempertature_d!=" " ){
+                    $scope.ProductStatus($scope.tempertature_d)
+                }
+                if($scope.tempertature_w!= undefined && $scope.tempertature_w!= " "){
+                    $scope.ProductStatus($scope.tempertature_w)
+                }
+                 
+            
+             if($scope.tempertature_h!= undefined && $scope.tempertature_h!= " "){
+                    $scope.ProductStatus($scope.tempertature_h)
+                }
+            }),(function(data,status, headers,config) {
+                var error_m=JSON.stringify({data:data})
+            alert( "failure message: COULD NOT UPDATE SHIPMENT STATUS");
+            
+            }));
+            
+            }
+             function   api_call_product(status,url,class_value){
+            
+            var search_payload={"$class":class_value,"uuid":$scope.uuid,"status":status};
+        
+            $http.post(url,search_payload).then((function(data,status,headers,config)
+             {
+            $scope.show=true;
+            alert( "SUCESSFULLY UPDATED PRODUCT STATUS");
+            
+            }),(function(data,status, headers,config) {
+                var error_m=JSON.stringify({data:data})
+            alert( "failure message: COULD NOT UPDATE PRODUCT STATUS");
+            
+            }));
+            
+            }
+            
+            
+            
+            }]); 
+            
+            
+            </script>
+	</body>
+
+</html>

@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Track and Trace</title>
+		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+        <script src="https://rawgit.com/gdi2290/angular-websocket/v1.0.9/angular-websocket.js"></script>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<link href="css/bootstrap.min.css" rel="stylesheet">
+		<link href="css/style.css" rel="stylesheet">	
+        <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
+	</head>
+
+	<body>
+	
+	<div class="container-fluid">
+	
+		<!-- Header Section starts here-->
+		<header class="header_bg">
+			<div class="header_left"></div>
+			<div class="header_right"></div>
+			
+			<div class="container">
+				<div class="logo_pharma">
+					<a href="#"><img src="images/logo.png" alt="logo"/></a>
+				</div>
+				
+				<div class="banner_text_right">
+					Blockchain for Business<br><b>WITH IBM BLOCKCHAIN</b>
+				</div>
+			</div>
+
+		</header> 
+		<!-- Header Section ends here-->
+		
+		<div class="wrapper">
+
+		<!-- Banner Section starts here-->
+		<div class="banner_track">
+			<div class="container">TRACK & TRACE</div>
+		</div>
+		<!-- Banner Section ends here-->
+		<div ng-app="myApp" ng-controller="myCtrl">
+		<!-- Content Section starts here-->
+		<div class="content_track">
+			<div class="container zero_padding">
+				<div class="col-md-3 zero_padding">
+					<div class="left_menu_items">
+						<ul class="left_menu_track">
+
+							<li class="item_track01" ><a href="index.html">Home</a></li>
+							<li class="item_track02 active_track_left_menu" ><a href="manufacturer.html">Manufacturer</a></li>
+							<li class="item_track03" ><a href="distributor.html">Distributor</a></li>
+							<li class="item_track04" ><a href="dealer.html">Dealer</a></li>
+							<li class="item_track05" ><a href="hospital.html">Hospital</a></li>
+							<li class="item_track06"><a href="dashboard_page2.html">Dashboard</a></li>
+						</ul>
+					</div>
+				</div>
+				<div class="col-md-9 zero_padding">
+					<div class="right_content_track">
+							<div style="text-align: center" class="alert alert-success" ng-show="sucess">
+									{{get_response}} 
+								</div>
+						<h4>REGISTER PRODUCT</h4>
+						<form>
+							<p class="manufactorer_fields_section">
+								<span>
+									<label>UUID</label>
+									<input type="text" value="UUID" ng-model="uuid">
+								</span>
+								<span>
+									<label>Material</label>
+									<input type="text" value="Material" ng-model="material">
+								</span>
+							</p>
+							
+							<p class="manufactorer_fields_section">
+								<span>
+									<label>Make</label>
+									<input type="text" value="Make"ng-model="make">
+								</span>
+								<span>
+									<label>Factory Name</label>
+									<input type="text" value="Factory Name" ng-model="factory_model">
+								</span>
+							</p>
+							
+							<p class="manufactorer_fields_section">
+								<span>
+									<label>Material Location</label>
+									<input type="text" value="Material Location" ng-model="material_location">
+								</span>
+								<span>
+									<label>Batch Code</label>
+									<input type="text" value="Batch Code"ng-model="batch_code">
+								</span>
+							</p>
+							
+							
+							<p class="submit_block submit">
+								<input type="button" class="submit_btn_cmn" value="Submit"ng-click="Create()">
+							</p>
+							
+						</form>
+					
+					</div>
+			  </div>
+			</div>
+		</div>
+		<!-- Content Section ends here-->
+		</div>
+		</div>
+		<!-- Footer Section starts here-->
+		<footer class="footer">©  copyright 2018</footer>
+		<!-- Footer Section ends here-->
+		
+	</div>
+	<script>
+  
+			var app = angular.module('myApp', []);
+			 
+			app.controller('myCtrl',['$scope','$http','$timeout',function ($scope,$http,$timeout) {
+				$scope.sucess=false;	  
+			$scope.Create = function(){
+			  $scope.message = "Product have been created sucessfully";
+			$scope.uuid_1=$scope.uuid;
+			$scope.setValue();
+			}
+			$scope.setValue=function() {
+			 
+			  var uuid =  $scope.uuid;
+			  var material = $scope.material;
+			  var make = $scope.make;
+			  var batchCode =  $scope.batch_code;
+			  var rawMat = $scope.material_location
+			  var  prod="IN_GOOD_CONDITION";
+			  var shipment="IN_PRODUCTION";
+			  var request={"$class": "com.cts.ipm.track.CreateProduct",
+							"uuid": uuid,
+							"product": {
+							  "$class": "com.cts.ipm.track.Product",
+							  "material": material,
+							  "make": make,
+							  "rawMaterialLocation": rawMat,
+							  "productStatus": prod,
+							  "shipmentStatus": shipment,
+							  "batchCode": batchCode
+							}
+							};
+				 var requestInfo = Request();
+			   
+				 data : requestInfo
+			  console.log(uuid);
+			 
+			  var res = $http.post('https://track-and-trace-network.mybluemix.net/api/CreateProduct',request).then(function successCallback(response){
+				$scope.sucess=true;	  
+				$scope.updated_response=response;
+            $scope.get_response=  "Successfully registered product with transaction Id: "+$scope.updated_response.data.transactionId;
+					
+					  
+				   }, function errorCallback(response){
+					   console.log("POST-ing of data failed");
+				   });
+			}
+			 
+			function Request() {
+			 
+			  return {
+				"Request" : {
+				  "$class": "com.cts.ipm.track.CreateProduct",
+				  "uuid": "",
+				  "product": {
+					"$class": "com.cts.ipm.track.Product",
+					"material": "",
+					"make": "",
+					"rawMaterialLocation": "",
+					"productStatus": "",
+					"shipmentStatus": "",
+					"batchCode": ""
+				 }
+			   }
+				}
+			  };
+			 
+			}]);
+			 
+			 
+			 
+			</script>
+	</body>
+
+</html>
