@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>PharmaApp</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+		<script src="https://rawgit.com/gdi2290/angular-websocket/v1.0.9/angular-websocket.js"></script>
+		<link type="text/css" rel="stylesheet" href="{{url_for('static',filename='css/bootstrap.min.css')}}"  media="screen,projection"/>
+		<link type="text/css" rel="stylesheet" href="{{url_for('static',filename='css/style.css')}}"  media="screen,projection"/>	
+        <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
+	</head>
+
+	<body class="manufacturer_wrapper">
+			<div ng-app="myApp" ng-controller="myCtrl">
+	
+                        <div class="alert alert-success" ng-show="show_1">
+                                Succesfully sold data
+                              </div>
+                              <div class="alert alert-danger" ng-show="show">{{text}}</div>
+                              <div class="alert alert-danger" ng-show="failuer_1">
+                                No drug with specified ID
+                              </div>
+                              <div class="alert alert-danger" ng-show="failuer">
+                                    No batch with specified ID
+                                  </div>     
+                                  <div class="alert alert-danger" ng-show="withdrawn">
+                                    Cannot sell as the drug is withdrawn
+                                  </div>  
+                               
+					<div class="right_content_block col-md-9">
+                            
+						<form>
+							
+                            <h2><b> PHARMACY-Sell Drug </b></h2>
+                            <span class="fields_design col-md-6">
+                                    <label> Drug Id</label>
+                                    <input id="drugid"type="text"ng-model="drugid" required>
+                                </span>
+                                <span class="fields_design col-md-6">
+                                        <label> Batch Code</label>
+                                        <input id="batchcode"type="text"ng-model="batchcode" required>
+                                    </span>
+                                    <span class="fields_design col-md-6">
+                                            <label>Quantity</label>
+                                            <input id="quantity" type="text"ng-model="quantity" required>
+                                        </span>
+                                    <span class="fields_design col-md-6">
+                                            <label>Action </label>
+                                            <div class="component"> <select  id="mySelect">
+                                                <option value="SELL">SELL</option>
+                                            </select></div>
+                                        </span>
+                                    <span class="fields_design col-md-6">
+                                        <div class="submit_block ">
+                                                <input type="button" value="Submit" class="submit_btn_cmn"ng-click="search()"/>
+                                            </div>
+                                    </span>
+                                    
+							<div class="clearfix"></div>
+							
+                        </form>
+                        
+					</div>
+			
+	</div>
+	<script>
+var app = angular.module('myApp', []);
+ 
+ app.controller('myCtrl',['$scope','$http','$timeout',function ($scope,$http,$timeout) {
+$scope.did=" "
+$scope.bid=""
+$scope.text=""
+$scope.show=false
+$scope.show_1=false
+var count=0;
+var count_1=0;
+$scope.failuer_1=false
+$scope.failuer=false
+$scope.withdrawn=false
+function Request() {
+return {
+"Request" : {
+    "$class": "org.acme.pharma_network.search",
+ "din": ""
+}
+}
+};
+function init(){
+var websocket =new WebSocket("ws://ec2-54-158-121-223.compute-1.amazonaws.com:3000");
+websocket.addEventListener('open',evt =>doSocketOpen(evt));
+websocket.addEventListener('message',evt =>doSocketMessage(evt));
+websocket.addEventListener('close',evt =>doSocketClose(evt));
+}
+function doSocketClose(evt) {
+console.log('Close.');
+}
+function doSocketMessage(evt) {
+let data =JSON.parse(evt.data);
+$scope.din=data.drug
+if(data.drug.drugStatus!="WITHDRAWN"){
+for(var i=0;i<data.drug.batch.length;i++){
+    if(data.drug.batch[i].batchCode==$scope.batchcode){
+        $scope.show_1=true;
+        count++;
+    if(data.drug.batch[i].batch.problemReported=="yes"){
+        $scope.show=true;
+        $scope.show_1=false
+        $scope.text +="There was a problem reported for this batch by "+data.drug.batch[i].batch.pharmaReported+". "
+    }
+}
+}
+}
+else{
+    $scope.withdrawn=true;
+    count_1++
+}
+if(count==0 && count_1==0){
+    $scope.failuer=true
+}
+}
+function doSocketOpen(evt) {
+console.log('Open.');
+}
+$scope.search=function(){
+init();
+var uuid =$scope.drugid;
+var request={"$class": "org.acme.pharma_network.search",
+ "din": uuid};
+var requestInfo = Request();
+$http.post("http://ec2-54-158-121-223.compute-1.amazonaws.com:3000/api/search",request).then((function(data,status,
+headers,config) {
+console.log("success");
+}),(function(data,status,headers,config) {
+    $scope.failuer_1=true
+}));
+}
+
+ }]);
+	</script>
+	</body>
+</html>

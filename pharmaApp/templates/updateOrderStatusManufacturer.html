@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>PharmaApp</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+		<script src="https://rawgit.com/gdi2290/angular-websocket/v1.0.9/angular-websocket.js"></script>
+		<link type="text/css" rel="stylesheet" href="{{url_for('static',filename='css/bootstrap.min.css')}}"  media="screen,projection"/>
+		<link type="text/css" rel="stylesheet" href="{{url_for('static',filename='css/style.css')}}"  media="screen,projection"/>	
+        <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
+	</head>
+
+	<body class="manufacturer_wrapper">
+			<div ng-app="myApp" ng-controller="myCtrl">
+	
+                        <div class="alert alert-success" ng-show="sucess">
+                                Updated order status with transaction Id {{transactionId}}
+                              </div>
+
+                              <div class="alert alert-info" ng-show="sucess_1">
+                                    <p id="demo"></p>
+                              </div>
+                              <div class="alert alert-danger" ng-show="failuer">
+                                Could not updated order status
+                              </div>
+                              <div class="alert alert-danger" ng-show="failuer_1">
+                                No order with specified ID
+                              </div>
+					<div class="right_content_block col-md-9">
+						<form>
+							
+                            <h2><b> Update Order Status</b></h2>
+                            <span class="fields_design col-md-6">
+                                    <label> Order Id</label>
+                                    <input id="barcode"type="text"ng-model="uuid" required>
+									 <div class="submit_block "ng-hide="show">
+                                        <input type="button" value="Submit" class="submit_btn_cmn"ng-click="search()"/>
+                                    </div>
+                                </span>
+                               
+							<div class="clearfix"></div>
+							<div class="component">
+                                <div ng-show="show">
+                                           
+								<span class="fields_design col-md-6">
+                                    <label> Moisture Experienced</label>
+                                    <input type="text" name="moisture"  ng-model="moisture" readonly>
+                                </span>
+                                <span class="fields_design col-md-6">
+                                        <label> Maximum Shake Experienced</label>
+                                        <input type="text" name="shake"  ng-model="shake" readonly>
+                                </span>
+                                <span class="fields_design col-md-6">
+                                        <label> Current Temperature</label>
+                                        <input type="text" name="temperature"  ng-model="temperature" readonly>
+                                </span>
+                                <span class="fields_design col-md-6">
+                                    <label>Select odrer status </label>
+                                    <select  id="mySelect">
+                                        <option value="SHIPPED_BY_MANUFACTURER">SHIPPED_BY_MANUFACTURER</option>
+                                    </select>
+                                </span>
+                                            <div>
+                                        </div>
+                                    </div>
+                                </span>
+							</div>
+							<div class="submit_block" ng-show="show">
+								<input type="button" value="Submit" class="submit_btn_cmn"ng-click="Create()"/>
+                            </div>
+							<div class="clearfix"></div>
+							
+							
+                           
+						</form>
+					</div>
+			
+	</div>
+	<script>
+var app = angular.module('myApp', []);
+ 
+ app.controller('myCtrl',['$scope','$http','$timeout',function ($scope,$http,$timeout) {
+    $scope.din=" "
+$scope.orderStatus=false;
+$scope.failuer_1=false
+$scope.failuer=false
+$scope.moisture=" "
+$scope.shake=" "
+$scope.text=" "
+$scope.sucess_1=false
+$scope.sucess=false
+function Request() {
+return {
+"Request" : {
+    "$class": "org.acme.pharma_network.search",
+ "din": ""
+}
+}
+};
+function init(){
+var websocket =new WebSocket("ws://ec2-54-158-121-223.compute-1.amazonaws.com:3000");
+websocket.addEventListener('open',evt =>doSocketOpen(evt));
+websocket.addEventListener('message',evt =>doSocketMessage(evt));
+websocket.addEventListener('close',evt =>doSocketClose(evt));
+}
+function doSocketClose(evt) {
+console.log('Close.');
+}
+function doSocketMessage(evt) {
+let data =JSON.parse(evt.data);
+$scope.show=true;
+$scope.din=data.orderId
+$scope.orderStatus=data.orderStatus
+$scope.moisture=data.moisture
+$scope.shake=data.shake
+$scope.temperature=data.temperature
+if(data.order!=undefined){
+for( var j = 0; j < data.order.batch.length; j++){ 
+    if(data.order.batch[j].Batch.problemReported=="yes"){
+        $scope.sucess_1=true
+$scope.text +="This order includes batch "
+    $scope.text+=data.order.batch[j].batchCode+" which was reported problem by pharama "+data.order.batch[j].Batch.pharmaReported+"<br>"
+}
+}
+}
+document.getElementById("demo").innerHTML = $scope.text;
+}
+function doSocketOpen(evt) {
+console.log('Open.');
+}
+$scope.search=function(){
+init();
+var uuid =$scope.uuid;
+var request={"$class": "org.acme.pharma_network.searchOrder",
+ "orderId": uuid};
+var requestInfo = Request();
+$http.post("http://ec2-54-158-121-223.compute-1.amazonaws.com:3000/api/searchOrder",request).then((function(data,status,
+headers,config) {
+console.log("success");
+}),(function(data,status,headers,config) {
+    $scope.failuer_1=true
+}));
+}
+$scope.Create = function(){
+$scope.x = document.getElementById("mySelect").value;
+$scope.message = "Product have been created sucessfully";
+$scope.setValue();
+}
+$scope.setValue=function() {
+  var request={
+  "$class": "org.acme.pharma_network.UpdateOrderStatus",
+  "order": "resource:org.acme.pharma_network.Order#"+$scope.uuid,
+  "orderStatus":$scope.x,
+  "moisture":$scope.moisture,
+  "shake": $scope.shake,
+  "temperature": $scope.temperature
+}
+     var requestInfo = Request();
+   
+     data : requestInfo
+ 
+  var res = $http.post('http://ec2-54-158-121-223.compute-1.amazonaws.com:3000/api/UpdateOrderStatus',request).then(function successCallback(response){
+           $scope.update_response=response;
+           $scope.sucess=true
+           $scope.transactionId=$scope.update_response.data.transactionId
+       }, function errorCallback(response){
+        $scope.failuer=true
+           console.log("Couldn't update data");
+       });
+}
+ 
+function Request() {
+ 
+  return {
+    "Request" : {
+        "$class": "org.acme.pharma_network.UpdateOrderStatus",
+        "order": "resource:org.acme.pharma_network.Order#7699",
+        "orderStatus": "WITH_MANUFACTURER",
+        "moisture": "",
+        "shake": "",
+        "temperature": ""
+   }
+    }
+  };
+ }]);
+	</script>
+	</body>
+</html>

@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>PharmaApp</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+		<script src="https://rawgit.com/gdi2290/angular-websocket/v1.0.9/angular-websocket.js"></script>
+		<link type="text/css" rel="stylesheet" href="{{url_for('static',filename='css/bootstrap.min.css')}}"  media="screen,projection"/>
+		<link type="text/css" rel="stylesheet" href="{{url_for('static',filename='css/style.css')}}"  media="screen,projection"/>	
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
+	</head>
+
+	<body class="manufacturer_wrapper">
+			<div ng-app="myApp" ng-controller="myCtrl">
+	
+            <div class="alert alert-success" ng-show="sucess">
+								Updated new batch with transaction Id {{transactionId}}
+							  </div>
+							  <div class="alert alert-danger" ng-show="failuer">
+								No drug with specified ID 
+							  </div>
+							  <div class="alert alert-danger" ng-show="failuer_1">
+									Could not add new Batch. 
+								  </div>
+					<div class="right_content_block col-md-9">
+                           
+						<form>
+                <div ng-hide="drugIdSearch">
+                            <span class="fields_design col-md-6">
+                              <label>Please enter the drug Id </label>
+                                <input id="barcode"type="text"ng-model="uuid" required>
+                                <div class="submit_block">
+                                    <input type="button" value="Submit" class="submit_btn_cmn"ng-click="search()"/>
+                                </div>
+                            </span>
+                            </div>
+                            <div ng-show="drugIdSearch">
+                                    <h2> REGISTER NEW BATCH </h2>
+                            <span class="fields_design col-md-6">
+                              <label> Batch code</label>
+                              <input type="text" name="batchCode"  ng-model="batchCode" required>
+                            </span>
+                            
+                            <span class="fields_design col-md-6">
+                              <label>Quantity </label>
+                              <input type="text" name="quantity"  ng-model="quantity_req">
+                            </span>
+                            <span class="fields_design col-md-6">
+                              <label>Drug ID</label>
+                              <input type="text" name="din"  ng-model="din" readonly>
+                            </span>
+							
+							<div class="clearfix"></div>
+							
+							<div class="component">
+                                <table>
+                                        <tr>
+                                                <td ><label>Supplier</label></td>
+                                                <td ><label>Composition</label></td>
+                                                <!--<td ><label>TEMEPERATURE</label></td>-->
+                                                <td ></th>
+                                            </tr>
+                                            
+                                                <tr ng-repeat="m in Customers">
+                                                    <td >{{m.supplier}}</td>
+                                                    <td >{{m.components}}</td>
+                                                   <!--<td >{{m.temeperature}}</td> -->
+                                                    
+                                                    <td><input type="button" ng-click="Remove($index)" value="Remove" /></td>
+                                                </tr>
+                                                <tr>
+                                                    <td ><input type="text" ng-model="supplier" /></td>
+                                                    <td ><select ng-options="x for x in names"  ng-model="components"></select></td>
+                                                   <!-- <td ><input type="text" ng-model="temeperature" /></td> -->
+                                                    <td ><input type="button" ng-click="Add()" value="Add" /></td>
+                                                </tr>
+                            </table>
+							</div>
+							
+							<div class="clearfix"></div>
+							
+							<div class="submit_block">
+								<input type="button" value="Submit" class="submit_btn_cmn"ng-click="Create()"/>
+                            </div>
+                            </div>
+						</form>
+					</div>
+
+	</div>
+	<script>
+var app = angular.module('myApp', []);
+ 
+ app.controller('myCtrl',['$scope','$http','$timeout',function ($scope,$http,$timeout) {
+    $scope.sucess=false
+	
+  $scope.transactionId="";
+  $scope.failuer=false
+  $scope.failuer_1=false
+$scope.Customers = [];
+$scope.Supply = [];
+  $scope.Create = function(){
+  $scope.message = "Product have been created sucessfully";
+$scope.setValue();
+}
+$scope.search=function(){
+init();
+var uuid =$scope.uuid;
+var request={"$class": "org.acme.pharma_network.search",
+ "din": uuid};
+ var requestInfo = Request();
+$http.post("http://ec2-54-158-121-223.compute-1.amazonaws.com:3000/api/search",request).then((function(data,status,
+headers,config) {
+console.log("success");
+}),(function(data,status,headers,config) {
+  $scope.failuer=true
+}));
+}
+
+ 
+ $scope.Add = function () {
+       //Add the new item to the Array.
+    var customer = {};
+    var customers = {};
+     customer.components=[];
+     var inside={}
+     inside.$class="org.acme.pharma_network.Component"
+     inside.manufactureTemperature=""
+     inside.name=$scope.components
+
+     if($scope.Supply.length==0){
+     customer.$class="org.acme.pharma_network.newSupplier"
+     customer.id = $scope.supplier;
+     customer.components.push(inside);
+     $scope.Supply.push(customer)
+}
+else {
+  for(var i=0;i<$scope.Supply.length;i++){
+    if($scope.Supply[i].id==$scope.supplier){
+     $scope.Supply[i].components.push(inside);
+     //$scope.Supply.splice(i);
+     break;
+    }
+    else {
+     customer.$class="org.acme.pharma_network.newSupplier"
+     customer.id = $scope.supplier;
+     customer.components.push(inside);
+     $scope.Supply.push(customer)
+     break;
+  }
+    }
+  }
+     customers.supplier = $scope.supplier;
+     customers.temeperature = ""
+     customers.components = $scope.components;
+     $scope.Customers.push(customers);
+    console.log($scope.Supply)
+     //Clear the TextBoxes.
+     $scope.supplier = "";
+     $scope.temeperature = "";
+     $scope.components = "";
+ };
+ $scope.Remove = function (index) {
+     //Find the record using Index from Array.
+     var name = $scope.Customers[index].Name;
+         $scope.Customers.splice(index, 1);
+     
+ }
+$scope.setValue=function() {
+  var request={
+  "$class": "org.acme.pharma_network.updateNewBatch",
+  "batch": {
+    "$class": "org.acme.pharma_network.newBatch",
+    "batchCode": $scope.batchCode,
+    "batch": {
+      "$class": "org.acme.pharma_network.Batch",
+      "drugId": $scope.din,
+      "quantity": $scope.quantity_req,
+	     "Initialquantity": 0,
+      "orderquantity": 0,
+      "problemReported": "",
+      "pharmaReported": "",
+      "orders": [],
+      "supplier": $scope.Supply
+    }
+  }
+}
+     var requestInfo = Request();
+   
+     data : requestInfo
+ 
+  var res = $http.post('http://ec2-54-158-121-223.compute-1.amazonaws.com:3000/api/updateNewBatch',request).then(function successCallback(response){
+           $scope.update_response=response;
+           $scope.sucess=true
+           $scope.transactionId=$scope.update_response.data.transactionId
+       }, function errorCallback(response){
+        $scope.failuer_1=true
+       });
+}
+ 
+function Request() {
+ 
+  return {
+  "$class": "org.acme.pharma_network.updateNewBatch",
+  "batch": {
+    "$class": "org.acme.pharma_network.newBatch",
+    "batchCode": "",
+    "batch": {
+      "$class": "org.acme.pharma_network.Batch",
+      "drugId": "",
+      "quantity": 0,
+      "orderquantity": 0,
+      "problemReported": "",
+      "pharmaReported": "",
+      "orders": [],
+      "supplier": []
+    }
+  }
+}
+  };
+  $scope.din=" "
+$scope.drugName=" "
+$scope.quantity=" "
+$scope.drugStatus=" "
+$scope.show=false;
+function Request() {
+return {
+"Request" : {
+    "$class": "org.acme.pharma_network.search",
+ "din": ""
+}
+}
+};
+function init(){
+var websocket =new WebSocket("ws://ec2-54-158-121-223.compute-1.amazonaws.com:3000");
+websocket.addEventListener('open',evt =>doSocketOpen(evt));
+websocket.addEventListener('message',evt =>doSocketMessage(evt));
+websocket.addEventListener('close',evt =>doSocketClose(evt));
+}
+function doSocketClose(evt) {
+console.log('Close.');
+}
+function doSocketMessage(evt) {
+let data =JSON.parse(evt.data);
+$scope.drugIdSearch=true;
+$scope.names = [];
+
+for(var i=0;i<data.drug.components.length;i++){
+$scope.names.push(data.drug.components[i])
+}
+$scope.din=data.din
+$scope.drugName=data.drug.drugName
+$scope.quantity=data.drug.quantity
+$scope.drugStatus=data.drug.drugStatus
+}
+
+function doSocketOpen(evt) {
+console.log('Open.');
+}
+
+ 
+ }]);
+	</script>
+	</body>
+</html>

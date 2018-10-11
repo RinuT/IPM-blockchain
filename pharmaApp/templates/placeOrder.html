@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>PharmaApp</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+		<link type="text/css" rel="stylesheet" href="{{url_for('static',filename='css/bootstrap.min.css')}}"  media="screen,projection"/>
+		<link type="text/css" rel="stylesheet" href="{{url_for('static',filename='css/style.css')}}"  media="screen,projection"/>	
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
+	</head>
+
+	<body class="manufacturer_wrapper">
+			<div ng-app="myApp" ng-controller="myCtrl">
+	
+            <div class="alert alert-success" ng-show="sucess">
+                Placed order with transaction Id {{transactionId}}
+              </div>
+              <div class="alert alert-danger" ng-show="failuer">
+                Could not place order. Order with same  ID exist. 
+              </div>
+					<div class="right_content_block col-md-9">
+						<form>
+							
+                                    <h2><b> Place Order </b></h2>
+                            <span class="fields_design col-md-6">
+                                    <label>Order Id</label>
+                                    <input type="text" name="orderID"  ng-model="orderID" required>
+                                </span>
+                                <span class="fields_design col-md-6">
+                                        <label>Quantity</label>
+                                        <input type="text" name="quantity"  ng-model="quantity">
+                                    </span>
+                                    <span class="fields_design col-md-6">
+                                            <label>Drug Id</label>
+                                            <input type="text" name="drug"  ng-model="drug">
+                                        </span>
+                                        <span class="fields_design col-md-6">
+                                                <label>Pharmacy Name</label>
+                                                <input type="text" name="orderer"  ng-model="orderer">
+                                            </span>
+							<div class="clearfix"></div>
+							<div class="submit_block">
+								<input type="button" value="Submit" class="submit_btn_cmn"ng-click="Create()"/>
+                            </div>
+                           
+						</form>
+					</div>
+			
+	</div>
+	<script>
+var app = angular.module('myApp', []);
+ 
+ app.controller('myCtrl',['$scope','$http','$timeout',function ($scope,$http,$timeout) {
+  $scope.failuer=false
+    $scope.sucess=false
+  $scope.transactionId="";
+$scope.Create = function(){
+  $scope.message = "Product have been created sucessfully";
+$scope.setValue();
+}
+$scope.setValue=function() {
+ 
+  var request={
+    "$class": "org.acme.pharma_network.PlaceOrder",
+  "orderId": $scope.orderID,
+  "quantity": $scope.quantity,
+  "moisture": "0",
+  "shake": "0",
+  "temperature": "0",
+  "fda":" ",
+  "drugStatus": "ACTIVE",
+  "orderStatus": "WITH_MANUFACTURER",
+  "batch": [],
+  "drug": "resource:org.acme.pharma_network.newDrug#"+$scope.drug,
+  "orderer": "resource:org.acme.pharma_network.Pharmacy#"+$scope.orderer
+}
+     var requestInfo = Request();
+   
+     data : requestInfo
+ 
+  var res = $http.post('http://ec2-54-158-121-223.compute-1.amazonaws.com:3000/api/PlaceOrder',request).then(function successCallback(response){
+         
+           $scope.update_response=response;
+           $scope.sucess=true
+           $scope.transactionId=$scope.update_response.data.transactionId
+          
+       }, function errorCallback(response){
+           $scope.failuer=true
+       });
+}
+ 
+function Request() {
+ 
+  return {
+    "Request" : {
+        "$class": "org.acme.pharma_network.PlaceOrder",
+  "orderId": "",
+  "quantity": 0,
+  "moisture": "",
+  "shake": "",
+  "temperature": "",
+  "fda":"",
+  "drugStatus": "AVAILABLE",
+  "orderStatus": "WITH_MANUFACTURER",
+  "batch": [],
+  "drug": "resource:org.acme.pharma_network.newDrug#6048",
+  "orderer": "resource:org.acme.pharma_network.Pharmacy#1676"
+  
+   }
+    }
+  };
+ 
+ }]);
+	</script>
+	</body>
+</html>

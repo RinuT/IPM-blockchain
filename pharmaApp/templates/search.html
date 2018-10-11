@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>PharmaApp</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+		<script src="https://rawgit.com/gdi2290/angular-websocket/v1.0.9/angular-websocket.js"></script>
+		<link type="text/css" rel="stylesheet" href="{{url_for('static',filename='css/bootstrap.min.css')}}"  media="screen,projection"/>
+		<link type="text/css" rel="stylesheet" href="{{url_for('static',filename='css/style.css')}}"  media="screen,projection"/>	
+        <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
+	</head>
+
+	<body class="manufacturer_wrapper">
+			<div ng-app="myApp" ng-controller="myCtrl">
+	
+							  <div class="alert alert-danger" ng-show="failuer">
+								No drug with specified ID 
+							  </div>
+							 
+					<div class="right_content_block col-md-9">
+						<form>
+							
+                            <h2><b> Search Drug </b></h2>
+							<span class="fields_design col-md-6 ">
+								<label>Drug Id</label>
+								<input id="barcode"type="text"ng-model="uuid" required>
+							</span>
+							<div class="clearfix"></div>
+							<span class="fields_design col-md-6 search_field_design">
+							<div class="component">
+                                    <div  ng-show="show" >
+                                            <div style= "padding: 2%;""text-align: center;">
+                                            <table BORDER=1 BORDERCOLOR="#8fb2b9" style="height:100px; width: 400px">
+                                            <thead style="background-color:white;" ><tr>
+                                            <th ><label> Drug Id </label></th>
+                                            <th><label> Drug Name </label></th>
+                                            <th ><label> Total Quantity </label></th>
+                                            <th><label> FDA Drug Status </label></th>
+                                            </tr>
+                                            </thead>
+                                            <tbody style="background-color:#b3c8cb;" >
+                                            <tr>
+                                            <td>{{din}}</td>
+                                            <td>{{drugName}}</td>
+                                            <td>{{quantity}}</td>
+                                            <td>{{drugStatus}}</td>
+                                            </tr>
+                                            </tbody>
+                                            </table>
+                                            </div>
+                                            </div>
+                                        </span>
+										
+										<span >
+							<div class="component">
+                                    <div  ng-show="inner" >
+									{{Customersustomers}}
+                                            <div style= "padding: 2%;""text-align: center;">
+                                            <table BORDER=1 BORDERCOLOR="#8fb2b9" style="height:100px; width: 400px">
+                                            <thead style="background-color:white;" ><tr>
+                                            <th ><label> Batch Id </label></th>
+											 <th><label> Stock Available </label></th>
+                                            <th><label> Initial Quantity </label></th>
+                                            <th><label>Problem Reported</label></th>
+                                            <th><label>Reporting Pharma</label></th>
+                                            </tr>
+                                            </thead>
+                                            <tbody style="background-color:#b3c8cb;" >
+                                              <tr ng-repeat="m in Customers">
+                                            <td>{{m.batchId}}</td>
+											<td>{{m.quantity_m}}</td>
+                                            <td>{{m.orderQuantity}}</td>
+                                            <td>{{m.reportedProblem}}</td>
+                                            <td>{{m.pharmaReported}}</td>
+                                            </tr>
+                                            </tbody>
+                                            </table>
+                                            <div class="table_text_result alert alert-danger" ng-show="show_1">{{text}}</div>
+                                            
+                                            </div>
+                                            </div>
+                                        </span>
+							</div>
+							
+							<div class="clearfix"></div>
+							
+							<div class="submit_block">
+								<input type="button" value="Submit" class="submit_btn_cmn"ng-click="search()"/>
+                            </div>
+                           
+						</form>
+					</div>
+			
+	</div>
+	<script>
+var app = angular.module('myApp', []);
+ 
+ app.controller('myCtrl',['$scope','$http','$timeout',function ($scope,$http,$timeout) {
+	$scope.failuer=false
+	$scope.inner=false
+    $scope.show_1=false
+    $scope.din=" "
+$scope.drugName=" "
+$scope.quantity=" "
+$scope.drugStatus=" "
+$scope.Customers = [];
+$scope.customers = {};
+$scope.customers.batchId=""
+$scope.customers.orderQuantity=""
+$scope.customers.quantity_muantity=""
+$scope.show=false;
+function Request() {
+return {
+"Request" : {
+    "$class": "org.acme.pharma_network.search",
+ "din": ""
+}
+}
+};
+function init(){
+var websocket =new WebSocket("ws://ec2-54-158-121-223.compute-1.amazonaws.com:3000");
+websocket.addEventListener('open',evt =>doSocketOpen(evt));
+websocket.addEventListener('message',evt =>doSocketMessage(evt));
+websocket.addEventListener('close',evt =>doSocketClose(evt));
+}
+function doSocketClose(evt) {
+console.log('Close.');
+}
+function doSocketMessage(evt) {
+let data =JSON.parse(evt.data);
+$scope.batchId=''
+$scope.orderQuantity=''
+$scope.show=true;
+$scope.text=""
+$scope.din=data.din
+$scope.drugName=data.drug.drugName
+$scope.quantity=data.drug.quantity
+$scope.drugStatus=data.drug.drugStatus
+if(data.drug.batch.length>0){
+$scope.inner=true
+for(var m=0;m<data.drug.batch.length;m++){
+
+$scope.customers.batchId=""
+$scope.customers.orderQuantity=""
+$scope.customers.batchId=data.drug.batch[m].batchCode
+$scope.customers.orderQuantity=data.drug.batch[m].batch.Initialquantity
+if(data.drug.batch[m].batch.problemReported=="yes"){
+$scope.customers.reportedProblem=data.drug.batch[m].batch.problemReported
+$scope.customers.pharmaReported=data.drug.batch[m].batch.pharmaReported
+}else{
+
+$scope.customers.reportedProblem="No"
+$scope.customers.pharmaReported="-"
+}
+$scope.customers.quantity_m=data.drug.batch[m].batch.quantity
+$scope.Customers.push($scope.customers)
+$scope.customers={}
+if(data.drug.batch[m].batch.problemReported=="yes"){
+    $scope.show_1=true
+    $scope.text +="Problem was reported on batch "+data.drug.batch[m].batchCode+". Conduct audit with suppliers "
+for(j = 0; j < data.drug.batch[m].batch.supplier.length; j++){
+    $scope.text +=  data.drug.batch[m].batch.supplier[j].id+"  "
+}
+
+}
+
+
+}
+
+}
+}
+function doSocketOpen(evt) {
+console.log('Open.');
+}
+$scope.search=function(){
+init();
+var uuid =$scope.uuid;
+var request={"$class": "org.acme.pharma_network.search",
+ "din": uuid};
+ var requestInfo = Request();
+$http.post("http://ec2-54-158-121-223.compute-1.amazonaws.com:3000/api/search",request).then((function(data,status,
+headers,config) {
+console.log("success");
+}),(function(data,status,headers,config) {
+$scope.failuer=true
+}));
+}
+ }]);
+	</script>
+	</body>
+</html>

@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>PharmaApp</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+        <link type="text/css" rel="stylesheet" href="{{url_for('static',filename='css/bootstrap.min.css')}}"  media="screen,projection"/>
+        <link type="text/css" rel="stylesheet" href="{{url_for('static',filename='css/style.css')}}"  media="screen,projection"/>
+        <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
+	</head>
+
+	<body class="manufacturer_wrapper">
+			<div ng-app="myApp" ng-controller="myCtrl">
+	
+					<div class="right_content_block col-md-9">
+						<div class="alert alert-success" ng-show="sucess">
+                        Added drug with transaction Id {{transactionId}}
+                      </div>
+                      <div class="alert alert-danger" ng-show="failuer">
+                        Could not add drug. Drug with same  ID exist. 
+                      </div>
+						<h2>REGISTER DRUG</h2>
+						<form>
+							<span class="fields_design col-md-6">
+								<label>Drug ID</label>
+								<input type="text" value="Enter drug ID"ng-model="drugID"/>
+							</span>
+							
+							<span class="fields_design col-md-6">
+								<label>Drug name</label>
+								<input type="text" value="Enter drug name"ng-model="drugName"/>
+							</span>
+							
+							<span class="fields_design col-md-6">
+								<label>Manufacturer  Name</label>
+								<input type="text" value="Manufacturer  name"ng-model="make"/>
+							</span>
+							
+							<div class="clearfix"></div>
+							
+							<span class="fields_design">
+                                <label>Composition</label>
+                                <table class="normal_table">
+                                <tr ng-repeat="m in Customers">
+                                    <td >{{m.components}}</td>
+                                    
+                                    <td ><span class="component"><input type="button" ng-click="Remove($index)" value="Remove" /></span></td>
+                                </tr>
+                                <tr>
+                                    <td ><input type="text" ng-model="components" /></td>
+                                    <td ><span class="component"><input type="button" ng-click="Add()" value="Add" /></span></td>
+                                </tr>
+                            </table>
+                        </span>
+							
+							<div class="clearfix"></div>
+							
+							<div class="submit_block">
+								<input type="button" value="Submit" class="submit_btn_cmn"ng-click="Create()"/>
+							</div>
+                        </form>
+                        
+                    </div>
+                    
+			
+	</div>
+	<script>
+var app = angular.module('myApp', []);
+ 
+ app.controller('myCtrl',['$scope','$http','$timeout',function ($scope,$http,$timeout) {
+    $scope.transactionId="";
+    $scope.failuer=false;
+  $scope.componenets_m = [];
+  $scope.Customers = [];
+  $scope.Customers.components = [];
+  $scope.sucess=false
+  $scope.Create = function(){
+  $scope.message = "Product have been created sucessfully";
+  $scope.uuid_1=$scope.uuid;
+  $scope.setValue();
+  }
+  $scope.Add = function () {
+       //Add the new item to the Array.
+    var customer = {};
+    var customers = {};
+     customer.components=[];
+     $scope.componenets_m.push($scope.components)
+     customers.components = $scope.components;
+     $scope.Customers.push(customers);
+     $scope.supplier = "";
+     $scope.temeperature = "";
+     $scope.components = "";
+ };
+ $scope.Remove = function (index) {
+     //Find the record using Index from Array.
+     var name = $scope.Customers[index].Name;
+         $scope.Customers.splice(index, 1);
+     
+ }
+  $scope.setValue=function() {
+ 
+  var drugName =  $scope.drugName;
+  //var quantity = $scope.quantity;
+  var drugStatus = "AVAILABLE";
+  var make =  $scope.make;
+  var supplier = $scope.supplier
+  var componenets_m=[];
+ componenets_m= $scope.componenets_m
+  var make="resource:org.acme.pharma_network.Manufacturer#"+make
+  var supplier= "resource:org.acme.pharma_network.Supplier#"+supplier
+  var request={
+  "$class": "org.acme.pharma_network.register",
+  "din": $scope.drugID,
+  "drug": {
+    "$class": "org.acme.pharma_network.Drug",
+    "drugName": drugName,
+    "quantity": 0,
+    "drugStatus": "AVAILABLE",
+    "make": make,
+    "components":componenets_m,
+    "batch": []
+  }
+}
+     var requestInfo = Request();
+   
+     data : requestInfo
+ 
+  var res = $http.post('http://ec2-54-158-121-223.compute-1.amazonaws.com:3000/api/register',request).then(function successCallback(response){
+           $scope.sucess=true
+           $scope.update_response=response;
+           $scope.transactionId=$scope.update_response.data.transactionId
+          
+       }, function errorCallback(response){
+           console.log("POST-ing of data failed");
+           $scope.failuer=true;
+       });
+}
+ 
+function Request() {
+ 
+  return {
+    "Request" : {
+        "$class": "org.acme.pharma_network.register",
+  "din": "",
+  "drug": {
+    "$class": "org.acme.pharma_network.Drug",
+    "drugName": "",
+    "quantity": 0,
+    "drugStatus": "AVAILABLE",
+    "make": "",
+    "components":"",
+    "batch": []
+  }
+   }
+    }
+  };
+ 
+ }]);
+	</script>
+	</body>
+</html>

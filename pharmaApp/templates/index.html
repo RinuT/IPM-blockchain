@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>PharmaApp</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+		<script src="https://rawgit.com/gdi2290/angular-websocket/v1.0.9/angular-websocket.js"></script>	
+		<link type="text/css" rel="stylesheet" href="{{url_for('static',filename='css/bootstrap.min.css')}}"  media="screen,projection"/>
+		<link type="text/css" rel="stylesheet" href="{{url_for('static',filename='css/style.css')}}"  media="screen,projection"/>
+        <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
+	</head>
+
+	<body>
+			<div ng-app="myApp" ng-controller="myCtrl">
+	<div class="container-fluid">
+	
+		<!-- Header Section starts here-->
+		<header class="header_bg">
+			<div class="header_left"></div>
+			<div class="header_right"></div>
+			
+			<div class="container">
+				<div class="logo_pharma">
+					<a href="#"><img src="images/logo.png" alt="logo"/></a>
+				</div>
+				
+				<div class="banner_text_right">
+					Blockchain for Business<br><b>WITH IBM BLOCKCHAIN</b>
+				</div>
+			</div>
+
+		</header> 
+		<!-- Header Section ends here-->
+
+		<div class="wrapper">
+		
+			<!-- Menu Section starts here-->
+			<section class="menu_items_ph" >
+				<div class="container">
+					<ul>
+						<li ng-click="show_m()"><a class="item item01" href="#">Manufacturer</a></li>
+						<li ng-click="show_p()"><a class="item item02" href="#">Pharmacy</a></li>
+						<li ng-click="show_d()"><a class="item item03" href="#">Distributor</a></li>
+						<li ng-click="show_i()"><a class="item item04" href="#">IoT</a></li>
+						<li ng-click="show_f()"><a class="item item05" href="#">FDA</a></li>
+					</ul>
+				</div>
+			</section>
+			<!-- Menu Section ends here-->
+
+
+			<!-- Content Section starts here-->
+			<section class="content_area">
+				<div class="container"style="height: 700px">
+				
+					<div ng-show="show_ma" class="left_submenu col-md-3">
+						<h1>Manufacturer</h1>
+						<ul>
+							<li><a href="manufacturer" target="iframe_b">Register Drug</a></li>
+							<li><a href="updateNewBatch" target="iframe_b">Register New Batch</a></li>
+							
+							<li><a href="updateOrderStatusManufacturer"target="iframe_b">Update Order Status</a></li>
+							<li><a href="search"target="iframe_b">Search Drug</a></li>
+						</ul>
+					</div>	<div  ng-show="show_di" class="left_submenu col-md-3">
+						<h1>Distributor</h1>
+						<ul>
+								<li><a href="updateOrderStatusDistributor"target="iframe_d">Update Order Status</a></li>
+								<li><a href="search"target="iframe_d">Search Drug</a></li>
+						</ul>
+					</div>
+					<div  ng-show="show_ph" class="left_submenu col-md-3">
+							<h1>Pharmacy</h1>
+							<ul>
+									<li><a href="placeOrder" target="iframe_p">Place Order</a></li>
+									<li><a href="temperatureHistory"target="iframe_p">Temperature History</a></li>
+									<li><a href="updateOrderStatusPharma"target="iframe_p">Update Order Status</a></li>
+									<li><a href="search"target="iframe_p">Search Drug</a></li>
+									<li><a href="searchOrder"target="iframe_p">Search Order</a></li>
+									<li><a href="reportProblem"target="iframe_p">Report Problem</a></li>
+									<li><a href="updateSell"target="iframe_p">Sell Drug</a></li>
+								</ul>
+									
+									 
+						</div>
+						<div  ng-show="show_io" class="left_submenu col-md-3">
+								<h1>IoT</h1>
+								<ul>
+									<li><a href="temeperatureUpdate"target="iframe_i">IoT Update</a></li>
+								</ul>
+							</div>
+							<div  ng-show="show_fda" class="left_submenu col-md-3">
+								<h1>IoT</h1>
+								<ul>
+									<li><a href="updateDrugStatus"target="iframe_f">Update Drug Status</a></li>
+								</ul>
+							</div>
+					
+					
+					<div class="right_content_block col-md-9"ng-show="show_ma">
+						
+							<iframe height="650px" width="100%" style="border: none;" src="manufacturer" name="iframe_b"></iframe>
+					
+					</div>
+					<div class="right_content_block col-md-9"ng-show="show_di">
+						
+							<iframe height="650px" width="100%" style="border: none" src="updateOrderStatusDistributor" name="iframe_d"></iframe>
+					
+					</div>
+					<div class="right_content_block col-md-9"ng-show="show_ph">
+						
+							<iframe  height="650px" width="100%" style="border: none" src="placeOrder" name="iframe_p"></iframe>
+					
+					</div>
+					<div class="right_content_block col-md-9" ng-show="show_io">
+						
+							<iframe  height="650px" width="100%" style="border: none" src="temeperatureUpdate" name="iframe_i"></iframe>
+					
+					</div>
+					<div class="right_content_block col-md-9" ng-show="show_fda">
+						
+						<iframe  height="650px" width="100%" style="border: none" src="updateDrugStatus.html" name="iframe_f"></iframe>
+				
+				</div>
+				</div>
+			</section>
+			<!-- Content Section ends here-->
+			</div>
+		</div>
+
+		<!-- Footer Section starts here-->
+		<footer class="footer">©  copyright 2018</footer>
+		<!-- Footer Section ends here-->
+		
+	</div>
+	<script>
+var app = angular.module('myApp', []);
+ 
+ app.controller('myCtrl',['$scope','$http','$timeout',function ($scope,$http,$timeout) {
+	$scope.show_ma=true;
+	$scope.show_di=false;
+	$scope.show_ph=false;
+	$scope.show_io=false;
+	$scope.show_fda=false
+$scope.show_m=function(){
+	var ifr = document.getElementsByName('iframe_b')[0];
+    ifr.src = ifr.src;
+	$scope.show_ma=true;
+	$scope.show_di=false;
+	$scope.show_ph=false;
+	$scope.show_io=false;
+	$scope.show_fda=false
+}
+$scope.show_d=function(){
+	var ifr = document.getElementsByName('iframe_d')[0];
+    ifr.src = ifr.src;
+	$scope.show_ma=false;
+	$scope.show_di=true;
+	$scope.show_ph=false;
+	$scope.show_io=false;
+	$scope.show_fda=false
+}
+$scope.show_p=function(){
+	var ifr = document.getElementsByName('iframe_p')[0];
+    ifr.src = ifr.src;
+	$scope.show_ma=false;
+	$scope.show_di=false;
+	$scope.show_ph=true;
+	$scope.show_io=false;
+	$scope.show_fda=false
+}
+$scope.show_i=function(){
+	var ifr = document.getElementsByName('iframe_i')[0];
+    ifr.src = ifr.src;
+	$scope.show_ma=false;
+	$scope.show_di=false;
+	$scope.show_ph=false;
+	$scope.show_io=true;
+	$scope.show_fda=false
+}  
+$scope.show_f=function(){
+	var ifr = document.getElementsByName('iframe_f')[0];
+    ifr.src = ifr.src;
+	$scope.show_ma=false;
+	$scope.show_di=false;
+	$scope.show_ph=false;
+	$scope.show_io=false;
+	$scope.show_fda=true
+}
+ }]);
+	</script>
+	</body>
+</html>

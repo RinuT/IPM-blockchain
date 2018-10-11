@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>PharmaApp</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+		<script src="https://rawgit.com/gdi2290/angular-websocket/v1.0.9/angular-websocket.js"></script>
+		<link type="text/css" rel="stylesheet" href="{{url_for('static',filename='css/bootstrap.min.css')}}"  media="screen,projection"/>
+		<link type="text/css" rel="stylesheet" href="{{url_for('static',filename='css/style.css')}}"  media="screen,projection"/>	
+        <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
+	</head>
+
+	<body class="manufacturer_wrapper">
+			<div ng-app="myApp" ng-controller="myCtrl">
+		
+                        <div class="alert alert-success" ng-show="show">
+                                Successfully reported problem with transaction Id {{transactionId}}
+                              </div>
+                              <div class="alert alert-danger" ng-show="failuer">
+                                Could not report problem
+                              </div>
+					<div class="right_content_block col-md-9">
+						<form>
+							
+                                    <h2><b> Report Problem</b></h2>
+                            <span class="fields_design col-md-6">
+                                    <label>Batch Id</label>
+                                    <input type="text" name="BatchCode"  ng-model="BatchCode" required>
+                                </span>
+                                <span class="fields_design col-md-6">
+                                        <label>Drug Id</label>
+                                        <input type="text" name="drugId"  ng-model="drugId">
+                                    </span>
+                                    <span class="fields_design col-md-6">
+                                            <label>Pharma that reported issue</label>
+                                            <input type="text" name="pharmaReported" ng-model="pharmaReported">
+                                        </span>
+							<div class="clearfix"></div>
+							<div class="submit_block">
+								<input type="button" value="Submit" class="submit_btn_cmn"ng-click="Create()"/>
+                            </div>
+                           
+						</form>
+					</div>
+				
+	</div>
+	<script>
+var app = angular.module('myApp', []);
+ 
+ app.controller('myCtrl',['$scope','$http','$timeout',function ($scope,$http,$timeout) {
+    $scope.components=[];
+    $scope.components.name=[];
+    $scope.components.temeperature=[];
+    $scope.text=" "
+    $scope.uuid_search=" "
+    $scope.supplier=""
+    demoP = document.getElementById("demo");
+    $scope.failuer=false
+    
+    function init(){
+var websocket =new WebSocket("ws://ec2-54-158-121-223.compute-1.amazonaws.com:3000");
+websocket.addEventListener('open',evt =>doSocketOpen(evt));
+websocket.addEventListener('close',evt =>doSocketClose(evt));
+websocket.addEventListener('message',evt =>doSocketMessage(evt));
+}
+function doSocketClose(evt) {
+console.log('Close.');
+}
+function doSocketMessage(evt) {
+let data =JSON.parse(evt.data);
+console.log(data);
+$scope.show=true;
+//$scope.components.name.push(data.components[0].name)
+//$scope.components.temeperature.push(data.components[0].manufactureTemperature)
+$scope.text +="List of suppliers that provided this batch"+"<br>"
+for(j = 0; j < data.batch.supplier.length; j++){
+    $scope.text +=j+1 +") "+ data.batch.supplier[j].id+"<br>"
+    $scope.text +="The list of components with temepertature"+"<br>"
+for (i = 0; i < data.batch.supplier[j].components.length; i++) {
+    $scope.text += i+1 +") "+data.batch.supplier[j].components[i].name + "    "+data.batch.supplier[j].components[i].manufactureTemperature+"<br>";
+}
+$scope.text +="<br>"
+}
+document.getElementById("demo").innerHTML = $scope.text;
+}
+function doSocketOpen(evt) {
+console.log('Open.');
+}
+$scope.Create = function(){
+    init();
+$scope.setValue();
+}
+$scope.setValue=function() {
+ 
+  var request={
+    "$class": "org.acme.pharma_network.reportProblem",
+  "BatchCode": $scope.BatchCode,
+  "drugId": $scope.drugId,
+  "pharmaReported": $scope.pharmaReported
+}
+     var requestInfo = Request();
+   
+     data : requestInfo
+ 
+  var res = $http.post('http://ec2-54-158-121-223.compute-1.amazonaws.com:3000/api/reportProblem',request).then(function successCallback(response){
+          
+           $scope.update_response=response;
+           $scope.succes=true
+           $scope.transactionId=$scope.update_response.data.transactionId  
+       }, function errorCallback(response){
+           console.log("POST-ing of data failed");
+           $scope.failuer=true
+       });
+}
+ 
+function Request() {
+ 
+  return {
+    "Request" : {
+        "$class": "org.acme.pharma_network.reportProblem",
+        "BatchCode": "",
+        "drugId": "",
+  "pharmaReported": ""
+   }
+    }
+  };
+ }]);
+	</script>
+	</body>
+</html>

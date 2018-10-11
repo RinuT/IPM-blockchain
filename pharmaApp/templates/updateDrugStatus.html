@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>PharmaApp</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+		<script src="https://rawgit.com/gdi2290/angular-websocket/v1.0.9/angular-websocket.js"></script>
+    <link type="text/css" rel="stylesheet" href="{{url_for('static',filename='css/bootstrap.min.css')}}"  media="screen,projection"/>
+		<link type="text/css" rel="stylesheet" href="{{url_for('static',filename='css/style.css')}}"  media="screen,projection"/>
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
+	</head>
+
+	<body class="manufacturer_wrapper">
+			<div ng-app="myApp" ng-controller="myCtrl">
+	
+            <div class="alert alert-success" ng-show="sucess">
+                Updated drug status with transaction Id {{transactionId}}
+              </div>
+              <div class="alert alert-danger" ng-show="failuer">
+                Could not updated drug status
+              </div>
+					<div class="right_content_block col-md-9">
+                       
+						<form>
+							
+                            
+                                    <h2><b> UPDATE DRUG STATUS </b></h2>
+							<span class="fields_design col-md-6">
+								<label> Drug Id</label>
+								<input type="text" name="orderID"  ng-model="orderID" required>
+							</span>
+							
+							<div class="clearfix"></div>
+							<span class="fields_design col-md-6">
+                                    <label>Select Drug Status</label>
+							<div class="component">
+                                    <select  id="mySelect">
+                                                    <option value="AVAILABLE">AVAILABLE</option>
+                                                    <option value="WITHDRAWN">WITHDRAWN</option>
+                                                </select>
+                                        </span>
+							</div>
+							
+							<div class="clearfix"></div>
+							
+							<div class="submit_block">
+								<input type="button" value="Submit" class="submit_btn_cmn"ng-click="Create()"/>
+                            </div>
+                           
+						</form>
+					</div>
+				
+	</div>
+	<script>
+var app = angular.module('myApp', []);
+ 
+ app.controller('myCtrl',['$scope','$http','$timeout',function ($scope,$http,$timeout) {
+    $scope.sucess=false
+  $scope.transactionId="";
+  $scope.failuer=false
+$scope.Create = function(){
+    $scope.x = document.getElementById("mySelect").value;
+    //var strSel = "The Value is: " + e.options[e.selectedIndex].value + " and text is: " + e.options[e.selectedIndex].text;
+   // alert($scope.x);
+  $scope.message = "Product have been created sucessfully";
+$scope.setValue();
+}
+$scope.setValue=function() {
+  var request={
+  "$class": "org.acme.pharma_network.UpdateDrugStatus",
+  "din": $scope.orderID,
+  "drugStatus": $scope.x
+}
+     var requestInfo = Request();
+   
+     data : requestInfo
+ 
+  var res = $http.post('http://ec2-54-158-121-223.compute-1.amazonaws.com:3000/api/UpdateDrugStatus',request).then(function successCallback(response){
+           //alert("Successfully created product");
+           $scope.update_response=response;
+          
+           $scope.sucess=true
+           $scope.transactionId=$scope.update_response.data.transactionId
+       }, function errorCallback(response){
+      
+        $scope.failuer=true;
+       });
+}
+ 
+function Request() {
+ 
+  return {
+    "Request" : {
+        "$class": "org.acme.pharma_network.UpdateDrugStatus",
+  "din": "",
+  "drugStatus": ""
+   }
+    }
+  };
+ }]);
+	</script>
+	</body>
+</html>
