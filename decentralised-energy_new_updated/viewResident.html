@@ -1,0 +1,224 @@
+<html>
+<head>              
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">	
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
+</head>
+
+<body class="manufacturer_wrapper" ng-init="loadResidents()">
+<div ng-app="myApp" ng-controller="myCtrl" >
+    <div class="right_content_block col-md-9">
+        <form>
+        <h2>RESIDENTS</h2>
+        <span class="fields_design col-md-6"></span>
+        <div class="component">
+                <div>
+                        <div class="col s12" >
+                        <div style= "padding: 2%;""text-align: center;">
+                        <table BORDER=1 BORDERCOLOR="#8fb2b9"style="height:100px; width: 100%">
+                            <thead style="background-color:white;"><tr>
+        <!-- <tr class="thead-cols">           -->
+            <th class="bc"><label>ID</label></th>        
+            <th class="bc" ><label>First Name</label></th>       
+            <th class="bc" ><label>Last Name</label></th>  
+            <th class="bc"><label>Coins Balance</label></th>  
+            <th class="bc"><label>Energy Value</label></th>
+            <th class="bc"><label>Energy Units</label></th>
+            <th class="bc"><label>Cash Balance</label></th>
+            <th class="bc"><label>Cash Currency</label></th>
+
+      </tr></thead>
+      <tbody style="background-color:#b3c8cb;">
+            <tr ng-repeat="resident in Residents">
+                <td><div ng-show="Residents[$index]">{{resident.residentID}}</div></td>           
+                <td><div ng-show="Residents[$index]">{{resident.firstName}}</div></td>            
+                <td><div ng-show="Residents[$index]">{{resident.lastName}}</div></td>
+                <td><div ng-show="Residents[$index]">{{resident.coins}}</div></td>
+                <td><div ng-show="Residents[$index]">{{resident.energy}}</div></td>
+                <td><div ng-show="Residents[$index]">{{resident.energyUnits}}</div></td>
+                <td><div ng-show="Residents[$index]">{{resident.cash}}</div></td>
+                <td><div ng-show="Residents[$index]">{{resident.cashCurrency}}</div></td>
+            </tr>  
+            </tbody> 
+      </table>
+    </div>
+</div>
+</div>
+</span>
+</div>
+<div class="clearfix"></div>
+</form> 
+</div>
+</div>
+</body>
+
+<script>
+var app = angular.module('myApp', []);
+app.controller('myCtrl',['$scope','$http','$q','$timeout',function ($scope,$http,$q,$timeout) {
+    
+    $scope.coinValue=[];
+    $scope.cashValue=[];
+    $scope.energyValue=[];
+    $scope.coinID=[];
+    $scope.cashID=[];
+    $scope.energyID=[];
+    var mySubStringCoin=""
+    var mySubStringCash="";
+    var mySubStringEnergy="";
+  $scope.sucess=false
+  $scope.transactionId="";
+  $scope.index=""
+ $scope.residentID="";
+ $scope.residentIDup="";
+ $scope.firstNameDup="";
+ $scope.lastNameDup="";
+ $scope.firstName="";
+ $scope.lastName="";
+ $scope.coins="";
+ $scope.energy="";
+ $scope.energyUnits="";
+ $scope.cash="";
+ $scope.cashCurrency="";
+ $scope.Residents = []
+ $scope.ResidentsResponse=[]
+ 
+  
+$scope.loadResidents = function() {
+    
+  var requestDisplay={
+  "$class": "org.decentralized.energy.network.Resident",
+  "residentID": $scope.residentID,
+  "firstName": $scope.firstName,
+  "lastName": $scope.lastName,
+  "coins": "resource:org.decentralized.energy.network.Coins#"+"CO_"+$scope.residentID,
+  "cash": "resource:org.decentralized.energy.network.Cash#"+"CA_"+$scope.residentID,
+  "energy": "resource:org.decentralized.energy.network.Energy#"+"EN_"+$scope.residentID
+} 
+ var requestInfo = Request();
+ data : requestInfo
+var res = $http.get('http://ec2-35-173-231-185.compute-1.amazonaws.com:3000/api/Resident/',requestDisplay).then((function(data,status,
+headers,config) {
+    console.log("success");
+for(var i=0;i<data.data.length;i++){   
+$scope.Residents.push(data.data[i]);
+$scope.Residents[i].energyUnits = "Kwh";
+$scope.Residents[i].cashCurrency = "USD";
+}
+$scope.loadCoinValue();
+$scope.loadCashValue();
+$scope.loadEnergyValue();
+}),(function(data,status,headers,config) {   
+alert( "cannot display data");
+}));
+};
+$scope.loadResidents();
+$scope.loadCoinValue = function()
+{
+    var result = $q.defer();
+    //setTimeout(result.resolve,$scope.Residents*100000);
+    for(var j=0;j<$scope.Residents.length;j++){       
+    var id = $scope.Residents[j].residentID;   
+    var res = $http.get('http://ec2-35-173-231-185.compute-1.amazonaws.com:3000/api/Coins/CO_'+id).then(function successCallback(response) {
+        result.resolve(response)
+$scope.coinValue.push(response.data.value);
+$scope.coinID.push(response.data.coinsID);
+if($scope.Residents.length == $scope.coinValue.length)
+{
+    $scope.insertCoins();
+}
+return result.promise;
+},(function(data,status,headers,config) {
+}));
+}
+}
+$scope.insertCoins = function()
+{
+    for(var m=0;m<$scope.Residents.length;m++){
+         mySubStringCoin = $scope.Residents[m].coins.substring($scope.Residents[m].coins.lastIndexOf("#") + 1);
+        if($scope.coinID[m] == mySubStringCoin)  
+        {
+        $scope.Residents[m].coins = $scope.coinValue[m];
+        }
+      }
+}
+$scope.loadCashValue = function()
+{
+    var result = $q.defer();
+    setTimeout(result.resolve,$scope.Residents*100000);
+    for(var j=0;j<$scope.Residents.length;j++){       
+    var id = $scope.Residents[j].residentID;    
+    var res = $http.get('http://ec2-35-173-231-185.compute-1.amazonaws.com:3000/api/Cash/CA_'+id).then(function successCallback(response) {
+        result.resolve(response)
+$scope.cashValue.push(response.data.value);
+$scope.cashID.push(response.data.cashID);
+if($scope.Residents.length == $scope.cashValue.length)
+{
+    $scope.insertCash();
+}
+return result.promise;
+},(function(data,status,headers,config) {
+}));
+}
+}
+$scope.insertCash = function()
+{
+    for(var m=0;m<$scope.Residents.length;m++){
+         mySubStringCash = $scope.Residents[m].cash.substring($scope.Residents[m].cash.lastIndexOf("#") + 1);
+        if($scope.cashID[m] == mySubStringCash)  
+        {
+      
+        $scope.Residents[m].cash = $scope.cashValue[m];
+        }
+      } 
+}
+$scope.loadEnergyValue = function()
+{
+    var result = $q.defer();
+    setTimeout(result.resolve,$scope.Residents*100000);
+    for(var j=0;j<$scope.Residents.length;j++){       
+    var id = $scope.Residents[j].residentID;     
+    var res = $http.get('http://ec2-35-173-231-185.compute-1.amazonaws.com:3000/api/Energy/EN_'+id).then(function successCallback(response) {
+        result.resolve(response)
+$scope.energyValue.push(response.data.value);
+$scope.energyID.push(response.data.energyID);
+if($scope.Residents.length == $scope.energyValue.length)
+{
+    $scope.insertEnergy();
+}
+return result.promise;
+},(function(data,status,headers,config) {
+}));
+}
+}
+$scope.insertEnergy = function()
+{
+    for(var m=0;m<$scope.Residents.length;m++){
+         mySubStringEnergy = $scope.Residents[m].energy.substring($scope.Residents[m].energy.lastIndexOf("#") + 1);
+        if($scope.energyID[m] == mySubStringEnergy)  
+        {
+      
+        $scope.Residents[m].energy = $scope.energyValue[m];
+        }
+      }
+    
+}
+function Request() {
+ 
+  return {
+  "$class": "org.decentralized.energy.network.Resident",
+  "residentID": "",
+  "firstName": "",
+  "lastName": "",
+  "coins": "",
+  "cash": "",
+  "energy": ""
+  }
+  };
+}]);
+ 
+</script>
+ 
+</html>

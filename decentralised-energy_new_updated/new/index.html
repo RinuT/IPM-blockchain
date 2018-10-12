@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>PharmaApp</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+		<link href="css/bootstrap.min.css" rel="stylesheet">
+		<link href="css/style.css" rel="stylesheet">	
+        <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
+	</head>
+
+	<body>
+			<div ng-app="myApp" ng-controller="myCtrl">
+	<div class="container-fluid">
+	
+		<!-- Header Section starts here-->
+		<header class="header_bg">
+			<div class="header_left"></div>
+			<div class="header_right"></div>
+			
+			<div class="container">
+				<div class="logo_pharma">
+					<a href="#"><img src="images/logo.png" alt="logo"/></a>
+				</div>
+				
+				<div class="banner_text_right">
+					Blockchain for Business<br><b>WITH IBM BLOCKCHAIN</b>
+				</div>
+			</div>
+
+		</header> 
+		<!-- Header Section ends here-->
+
+		<div class="wrapper">
+		
+			<!-- Menu Section starts here-->
+			<section class="menu_items_ph" >
+				<div class="container">
+					<ul>
+						<li ng-click="show_m()"><a class="item item01" href="#">Manufacturer</a></li>
+						<li ng-click="show_p()"><a class="item item02" href="#">Pharmacy</a></li>
+						<li ng-click="show_d()"><a class="item item03" href="#">Distributer</a></li>
+						<li ng-click="show_i()"><a class="item item04" href="#">IoT</a></li>
+					</ul>
+				</div>
+			</section>
+			<!-- Menu Section ends here-->
+
+
+			<!-- Content Section starts here-->
+			<section class="content_area">
+				<div class="container"style="height: 700px">
+				
+					<div ng-show="show_ma" class="left_submenu col-md-3">
+						<h1>Manufacturer</h1>
+						<ul>
+							<li><a href="sample.html" target="iframe_b">Register Drug</a></li>
+							<li><a href="#">Register New Batch</a></li>
+							<li><a href="#">Update Drug Status</a></li>
+							<li><a href="#">Update Order Status</a></li>
+							<li><a href="#">Search Drug</a></li>
+						</ul>
+					</div>	<div  ng-show="show_di" class="left_submenu col-md-3">
+						<h1>Distributor</h1>
+						<ul>
+								<li><a href="#">Update Order Status</a></li>
+								<li><a href="#">Search Drug</a></li>
+							<li><a href="#">Report Problem</a></li>
+						</ul>
+					</div>
+					<div  ng-show="show_ph" class="left_submenu col-md-3">
+							<h1>Pharmacy</h1>
+							<ul>
+									<li><a href="sample.html" target="iframe_b">Place Order</a></li>
+									<li><a href="#">Temperature History</a></li>
+									<li><a href="#">Update Temperarture</a></li>
+									<li><a href="#">Update Order Status</a></li>
+									<li><a href="#">Search Drug</a></li>
+									<li><a href="#">Search Order</a></li>
+									<li><a href="#">Report Problem</a></li></ul>
+									 
+						</div>
+						<div  ng-show="show_io" class="left_submenu col-md-3">
+								<h1>IoT</h1>
+								<ul>
+									<li><a href="#">Update Temperature</a></li>
+								</ul>
+							</div>
+					
+					
+					<div class="right_content_block col-md-9">
+						
+							<iframe height="600px" width="700px" style="border: none" src="manufacturer.html" name="iframe_b"></iframe>
+					
+					</div>
+				</div>
+			</section>
+			<!-- Content Section ends here-->
+			</div>
+		</div>
+
+		<!-- Footer Section starts here-->
+		<footer class="footer">©  copyright 2018</footer>
+		<!-- Footer Section ends here-->
+		
+	</div>
+	<script>
+var app = angular.module('myApp', []);
+ 
+ app.controller('myCtrl',['$scope','$http','$timeout',function ($scope,$http,$timeout) {
+$scope.show_m=function(){
+	$scope.show_ma=true;
+	$scope.show_di=false;
+	$scope.show_ph=false;
+	$scope.show_io=false;
+}
+$scope.show_d=function(){
+	$scope.show_ma=false;
+	$scope.show_di=true;
+	$scope.show_ph=false;
+	$scope.show_io=false;
+}
+$scope.show_p=function(){
+	$scope.show_ma=false;
+	$scope.show_di=false;
+	$scope.show_ph=true;
+	$scope.show_io=false;
+}
+$scope.show_i=function(){
+	$scope.show_ma=false;
+	$scope.show_di=false;
+	$scope.show_ph=false;
+	$scope.show_io=true;
+}  
+ }]);
+	</script>
+	</body>
+</html>

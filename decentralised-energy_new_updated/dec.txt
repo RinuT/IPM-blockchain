@@ -1,0 +1,11 @@
+composer network install --card PeerAdmin@hlfv1 --archiveFile decentralised-energy.bna
+
+decentralized-energy-network, version 0.1.15
+
+
+composer network start --networkName decentralized-energy-network --networkVersion 0.1.15 --networkAdmin admin --networkAdminEnrollSecret adminpw --card PeerAdmin@hlfv1 --file networkadmin.card
+
+
+1.	ssh -i "BCGarage_Kochi2.pem" ubuntu@ec2-35-173-231-185.compute-1.amazonaws.com
+
+ http://ec2-35-173-231-185.compute-1.amazonaws.com:3000/explorer
